@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFQ Hub — Publish RFQs, Find Suppliers</title>
+  <meta name="description" content="RFQ Hub: contractors publish requests for quotation online and reach registered suppliers by province. Suppliers register free.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- DYNAMIC BRANDING HEADER -->
+  <header id="site-header" class="site-header">
+    <a href="./" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 16px;">
+      <div id="brand-logo-group" class="brand-logo-group">
+        <img id="brand-logo-img" src="" alt="Company logo" style="display:none; height:84px; width:auto; max-width:260px; object-fit:contain; flex-shrink:0;">
+        <svg id="brand-logo-default" width="84" height="84" viewBox="0 0 100 100" style="flex-shrink: 0;">
+          <circle cx="50" cy="50" r="46" fill="#FFFFFF"/>
+          <path d="M 50 15 C 65 20, 75 35, 72 50 C 70 60, 60 65, 50 62 C 45 45, 45 30, 50 15 Z" fill="#0F3557"/>
+          <path d="M 50 20 C 58 25, 63 35, 60 45 C 58 50, 52 52, 48 48 C 46 38, 47 28, 50 20 Z" fill="#F57C00"/>
+          <path d="M 25 45 A 25 25 0 1 1 30 65" fill="none" stroke="#0F3557" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1 id="brand-title" style="margin: 0; font-size: 24px; font-weight: bold; color: white; font-family: 'IBM Plex Sans', sans-serif;">RFQ Hub</h1>
+          <p id="brand-subtitle" style="margin: 0; font-size: 12px; color: #AFC4DB; font-family: 'IBM Plex Sans', sans-serif;">Request for Quotation Management System</p>
+        </div>
+      </div>
+    </a>
+
+    <button id="mobile-nav-toggle" class="mobile-nav-toggle" type="button" onclick="toggleMobileNav()" aria-label="Toggle menu" aria-expanded="false" aria-controls="site-nav-wrap">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+
+    <div id="site-nav-wrap" class="site-nav-wrap">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#" onclick="navGoOpportunities(); return false;">Opportunities</a>
+        <a href="#" onclick="navGoHowItWorks(); return false;">How It Works</a>
+        <a href="#" onclick="navGoPricing(); return false;">For Contractors</a>
+        <a href="#" onclick="navGoAbout(); return false;">About</a>
+        <a href="#" onclick="navGoHelp(); return false;">Help</a>
+      </nav>
+      <div id="header-actions" class="site-header-ctas"></div>
+    </div>
+  </header>
+
+  <!-- DYNAMIC HERO SECTION -->
+  <div id="hero-section" style="position:relative; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); padding: 60px 40px 50px 40px; text-align: left; overflow:hidden;">
+    <svg aria-hidden="true" style="position:absolute; inset:0; width:100%; height:100%; opacity:0.12; pointer-events:none;" preserveAspectRatio="xMidYMax slice" viewBox="0 0 1200 300">
+      <path d="M0,300 L0,180 L60,180 L60,140 L110,140 L110,100 L150,100 L150,160 L200,160 L200,120 L200,120 L240,120 L240,190 L300,190 L300,90 L340,90 L340,60 L380,60 L380,150 L440,150 L440,110 L480,110 L480,170 L540,170 L540,130 L590,130 L590,80 L630,80 L630,200 L690,200 L690,140 L740,140 L740,100 L790,100 L790,180 L850,180 L850,120 L900,120 L900,70 L940,70 L940,160 L1000,160 L1000,110 L1050,110 L1050,190 L1100,190 L1100,150 L1150,150 L1150,100 L1200,100 L1200,300 Z" fill="white"/>
+    </svg>
+    <h1 id="hero-title" style="position:relative; margin: 0 0 15px 0; font-size: 44px; font-weight: 800; color: white; font-family: 'IBM Plex Sans', sans-serif; letter-spacing:-0.01em;">RFQ Hub</h1>
+    <p id="hero-subtitle" style="position:relative; margin: 0 0 30px 0; font-size: 17px; color: #C7D8EA; font-family: 'IBM Plex Sans', sans-serif; line-height: 1.6; max-width: 600px;">Open requests for quotation. Apply directly online — you'll get a reference number and a confirmation the moment your application is received.</p>
+
+    <!-- Marketplace-specific hero content (CTA buttons + live stats). Only
+         shown on the public landing page — showLandingView() reveals this,
+         hideAllTopLevelViews() hides it again for every other view (login,
+         admin dashboard, contractor pages, etc.) so it never bleeds into
+         screens where it doesn't belong. -->
+    <div id="hero-marketplace-extras" style="display:none; position:relative;">
+      <div class="hero-cta-row">
+        <button type="button" class="btn gold hero-btn-primary" onclick="document.getElementById('public-rfq-list').scrollIntoView({behavior:'smooth'})">Browse Opportunities →</button>
+        <button type="button" class="hero-btn-secondary" onclick="openApplicantGate(null)">Register as a Supplier</button>
+        <button type="button" class="hero-btn-secondary" onclick="navGoPricing()">Publish RFQs: Free Trial</button>
+      </div>
+      <div id="hero-stats-row" class="hero-stats-row" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="app-container" style="min-height: 100vh;">
+    <!-- Floating WhatsApp help button — a sibling of public-view/admin-view/
+         super-admin-view (not nested inside any of them) so its visibility
+         can be kept in sync with whichever of those is showing, regardless
+         of which of the several functions switched views. Starts hidden;
+         setupWhatsappFabSync() in app.js keeps it in sync via a
+         MutationObserver on public-view/admin-view's style attribute. Shown
+         on the contractor company dashboard and the public applicant-facing
+         pages; hidden on the platform Super Admin view. -->
+    <a id="whatsapp-help-btn" class="whatsapp-fab" href="https://wa.me/27608995215?text=Hi%2C%20I%20need%20help%20with%20the%20RFQ%20Hub" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp" style="display:none;">
+      <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#FFFFFF" d="M12 2C6.48 2 2 6.26 2 11.5c0 2.02.66 3.9 1.8 5.44L2.5 21.5l4.86-1.24A10.4 10.4 0 0 0 12 21c5.52 0 10-4.26 10-9.5S17.52 2 12 2z"/>
+        <path fill="#25D366" d="M9.05 7.6c-.24-.53-.5-.54-.73-.55-.19-.01-.4-.01-.62-.01-.21 0-.56.08-.85.4-.29.32-1.12 1.1-1.12 2.68 0 1.57 1.15 3.09 1.3 3.3.16.21 2.2 3.53 5.44 4.81 2.69 1.06 3.24.85 3.82.8.58-.06 1.88-.77 2.14-1.51.27-.74.27-1.38.19-1.51-.08-.13-.29-.21-.61-.37-.32-.16-1.88-.93-2.17-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.58-1.87-1.76-2.19-.19-.32-.02-.49.14-.65.14-.14.32-.37.48-.55.16-.19.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.7-1.77-.99-2.44z"/>
+      </svg>
+      <span class="whatsapp-fab-label">Need help? Chat on WhatsApp</span>
+    </a>
+
+    <!-- PUBLIC VIEW (Contractor Portal + Landing + Auth) -->
+    <div id="public-view" style="display:none; padding: 40px;">
+      <div id="rfq-portal" style="display:none;"></div>
+      <div id="no-rfq-message" style="display:none;"></div>
+
+      <div id="landing-section" style="display:none;">
+        <div style="max-width: 1200px; margin: 0 auto 30px auto;">
+          <div class="card" style="text-align:center; padding:16px 24px;">
+            <p style="margin:0; font-size:13px; color:var(--border);"><strong>Suppliers</strong> register free. <strong>Contractors</strong> who want to publish RFQs can <a href="#" onclick="navGoPricing(); return false;" style="color:var(--primary); font-weight:600;">start a 30-day free trial</a>. Already have an account? Use <strong>Sign In</strong> above.</p>
+          </div>
+        </div>
+
+        <div class="landing-two-col" style="max-width: 1200px; margin: 0 auto; display:grid; grid-template-columns: 2fr 1fr; gap:30px; align-items:start;">
+          <div>
+            <h2 class="section-eyebrow" style="margin-bottom:5px;">OPEN OPPORTUNITIES</h2>
+            <p style="color:var(--border); margin:10px 0 20px 0;">Find current Requests for Quotation from organisations looking for suppliers and service providers.</p>
+
+            <div class="opp-search-wrap">
+              <form id="hero-search-form" class="opp-search-bar">
+                <input type="text" id="hero-search-input" placeholder="Search opportunities...">
+                <button type="submit">Search</button>
+              </form>
+              <div class="opp-filter-row">
+                <select id="public-rfq-province-filter" class="opp-filter-pill">
+                  <option value="">All Provinces</option>
+                  <option value="Eastern Cape">Eastern Cape</option>
+                  <option value="Free State">Free State</option>
+                  <option value="Gauteng">Gauteng</option>
+                  <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                  <option value="Limpopo">Limpopo</option>
+                  <option value="Mpumalanga">Mpumalanga</option>
+                  <option value="Northern Cape">Northern Cape</option>
+                  <option value="North West">North West</option>
+                  <option value="Western Cape">Western Cape</option>
+                </select>
+                <select id="public-rfq-category-filter" class="opp-filter-pill" disabled title="Category data isn't tracked yet — coming soon">
+                  <option value="">All Categories</option>
+                </select>
+                <select id="public-rfq-sort" class="opp-filter-pill">
+                  <option value="deadline_asc">Sort: Closing Soonest</option>
+                  <option value="deadline_desc">Sort: Closing Latest</option>
+                  <option value="budget_desc">Sort: Highest Budget</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="public-rfq-list"></div>
+          </div>
+
+          <div class="card" id="why-register-card">
+            <h3 class="section-eyebrow" style="font-size:18px;">WHY BECOME A REGISTERED SUPPLIER?</h3>
+            <div style="margin-top:16px;">
+              <div class="why-register-item">
+                <div class="why-register-icon why-register-check">✓</div>
+                <div>
+                  <h4>Access More Opportunities</h4>
+                  <p>See RFQs published by participating organisations.</p>
+                </div>
+              </div>
+              <div class="why-register-item">
+                <div class="why-register-icon why-register-check">✓</div>
+                <div>
+                  <h4>Submit Online</h4>
+                  <p>Complete your quotation and upload supporting documents digitally.</p>
+                </div>
+              </div>
+              <div class="why-register-item">
+                <div class="why-register-icon why-register-check">✓</div>
+                <div>
+                  <h4>Build Your Supplier Profile</h4>
+                  <p>Enter your company information once and reuse it.</p>
+                </div>
+              </div>
+              <div class="why-register-item">
+                <div class="why-register-icon why-register-check">✓</div>
+                <div>
+                  <h4>Track Your Applications</h4>
+                  <p>Keep a record of the RFQs you've responded to and their status.</p>
+                </div>
+              </div>
+              <div class="why-register-item" style="margin-bottom:0;">
+                <div class="why-register-icon why-register-check">✓</div>
+                <div>
+                  <h4>Secure &amp; Confidential</h4>
+                  <p>Your submission is only ever shared with the organisation running the RFQ.</p>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn gold" style="width:100%; padding:12px; margin-top:6px;" onclick="openApplicantGate(null)">Register Free →</button>
+            <p style="text-align:center; margin:12px 0 0 0; font-size:13px; color:var(--border);">Already registered? <a href="#" onclick="document.getElementById('public-rfq-list').scrollIntoView({behavior:'smooth'}); return false;" style="color:var(--primary); font-weight:600;">Browse Opportunities</a></p>
+          </div>
+        </div>
+
+        <div id="how-it-works-section" style="max-width: 1200px; margin: 60px auto 0 auto; padding:40px 0; border-top:1px solid #E4E7EB;">
+          <h2 class="section-eyebrow" style="text-align:center; display:block; width:fit-content; margin:0 auto 40px auto;">HOW IT WORKS</h2>
+          <div class="how-it-works-grid">
+            <div class="how-it-works-step">
+              <div class="how-it-works-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              </div>
+              <p class="how-it-works-step-num">01</p>
+              <h4>Discover</h4>
+              <p>Find an RFQ that matches your business.</p>
+            </div>
+            <div class="how-it-works-step">
+              <div class="how-it-works-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <p class="how-it-works-step-num">02</p>
+              <h4>Register</h4>
+              <p>Create your free supplier account.</p>
+            </div>
+            <div class="how-it-works-step">
+              <div class="how-it-works-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              </div>
+              <p class="how-it-works-step-num">03</p>
+              <h4>Submit</h4>
+              <p>Complete the response and upload supporting documents.</p>
+            </div>
+            <div class="how-it-works-step">
+              <div class="how-it-works-step-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+              </div>
+              <p class="how-it-works-step-num">04</p>
+              <h4>Get Reviewed</h4>
+              <p>The organisation evaluates submissions and contacts successful suppliers.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="trust-section" class="trust-section-band" style="max-width: 1200px; margin: 40px auto 0 auto;">
+          <h2 class="section-eyebrow" style="text-align:center; display:block; width:fit-content; margin:0 auto 40px auto;">A BETTER WAY TO CONNECT BUYERS &amp; SUPPLIERS</h2>
+          <div class="trust-grid">
+            <div class="trust-item">
+              <div class="trust-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2c2.5 3 4 7 4 10s-1.5 7-4 10c-2.5-3-4-7-4-10s1.5-7 4-10z"/></svg></div>
+              <h4>Transparent</h4>
+              <p>Clear RFQ requirements and closing dates.</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <h4>Secure</h4>
+              <p>Your submission is securely handled.</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-4z"/></svg></div>
+              <h4>Accessible</h4>
+              <p>Opportunities are available to registered suppliers.</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <h4>Professional</h4>
+              <p>A structured process for quotations and supplier responses.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="pricing-section" class="pricing-section">
+          <h2 class="section-eyebrow" style="text-align:center; display:block; width:fit-content; margin:0 auto 12px auto;">FOR CONTRACTORS</h2>
+          <p class="pricing-lead">Publish RFQs online, reach registered suppliers in the provinces you choose, and receive quotations and documents in one place. Suppliers register and apply free.</p>
+          <div class="pricing-trial-note">Every plan starts with a <strong>30-day free trial</strong>. No card needed to start.</div>
+          <div id="pricing-cycle-toggle" class="pricing-cycle-toggle" style="display:none;">
+            <button type="button" class="active" data-cycle="monthly" onclick="setPricingCycle('monthly')">Monthly</button>
+            <button type="button" data-cycle="annual" onclick="setPricingCycle('annual')">Annual</button>
+          </div>
+          <div id="pricing-grid" class="pricing-grid"><p style="text-align:center; color:var(--border);">Loading plans…</p></div>
+          <p class="pricing-footnote">Prices in South African Rand. RFQ allowance resets on the 1st of each month. Billed securely by PayFast; cancel any time from your dashboard.</p>
+        </div>
+
+        <div id="org-logos-section" style="display:none; max-width: 1200px; margin: 0 auto; padding:40px 0; border-top:1px solid #E4E7EB;">
+          <h2 class="section-eyebrow" style="text-align:center; display:block; width:fit-content; margin:0 auto 30px auto;">ORGANISATIONS USING THE PLATFORM</h2>
+          <div id="org-logos-grid" class="org-logos-grid"></div>
+        </div>
+
+        <div class="final-cta-section">
+          <div class="final-cta-inner">
+            <h2>Ready to Find Your Next Business Opportunity?</h2>
+            <p>Register as a supplier and start responding to RFQs online.</p>
+            <button type="button" class="btn gold" style="padding:14px 32px; font-size:15px;" onclick="openApplicantGate(null)">Create Free Supplier Account</button>
+            <p style="margin-top:14px; font-size:13px;"><a href="#" onclick="document.getElementById('public-rfq-list').scrollIntoView({behavior:'smooth'}); return false;" style="color:#C7D8EA;">Already registered? Browse Opportunities</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="login-section" style="display:none; max-width: 420px; margin: 0 auto;">
+        <div class="card">
+          <h2 style="margin-top:0;">Staff Login</h2>
+          <form id="login-form" style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+              <label>Email</label>
+              <input type="email" id="login-email" required style="width:100%;">
+            </div>
+            <div>
+              <label>Password</label>
+              <input type="password" id="login-password" required style="width:100%;">
+            </div>
+            <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Log In</button>
+          </form>
+          <p style="text-align:center; margin-top:12px; font-size:13px;">
+            <a href="#" onclick="showForgotPasswordView(); return false;" style="color:var(--primary); font-weight:600;">Forgot your password?</a>
+          </p>
+          <p style="text-align:center; margin-top:15px; font-size:13px; color:var(--border);">
+            No account yet? Team members are invited by their company admin. Contractors can <a href="#" onclick="openContractorSignup(); return false;" style="color:var(--primary); font-weight:600;">start a 30-day free trial</a>.
+          </p>
+        </div>
+      </div>
+
+      <div id="forgot-password-section" style="display:none; max-width: 420px; margin: 0 auto;">
+        <div class="card">
+          <h2 style="margin-top:0;">Reset Your Password</h2>
+          <p style="color:var(--border); font-size:14px; margin-bottom:15px;">Enter the email address on your account and we'll send you a 6-digit code to set a new password.</p>
+          <form id="forgot-password-form" style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+              <label>Email</label>
+              <input type="email" id="forgot-password-email" required style="width:100%;">
+            </div>
+            <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Send Code</button>
+          </form>
+          <p id="forgot-password-sent-note" style="display:none; margin-top:5px; margin-bottom:15px; padding:12px; background:#E1F0FF; border-radius:4px; font-size:14px;">
+            If an account exists for that email, a 6-digit code is on its way. KEEP THIS SITE OPEN and check your inbox (and spam folder) — the code is valid for a limited time and can only be used once.
+          </p>
+          <form id="reset-code-form" style="display:none; flex-direction:column; gap:15px;">
+            <div>
+              <label>6-Digit Code</label>
+              <input type="text" id="reset-code-token" required inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" style="width:100%; letter-spacing:4px; font-size:18px; text-align:center;">
+            </div>
+            <div>
+              <label>New Password *</label>
+              <input type="password" id="reset-code-new-password" required minlength="6" style="width:100%;">
+            </div>
+            <div>
+              <label>Confirm New Password *</label>
+              <input type="password" id="reset-code-confirm-password" required minlength="6" style="width:100%;">
+            </div>
+            <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Reset Password</button>
+          </form>
+          <p style="text-align:center; margin-top:15px; font-size:13px;">
+            <a href="#" onclick="showLoginForm(); return false;" style="color:var(--primary); font-weight:600;">Back to Sign In</a>
+          </p>
+        </div>
+      </div>
+
+      <div id="set-password-section" style="display:none; max-width: 420px; margin: 0 auto;">
+        <div class="card">
+          <h2 id="set-password-heading" style="margin-top:0;">Choose a Password</h2>
+          <p id="set-password-subtext" style="color:var(--border); font-size:14px; margin-bottom:15px;">You've been invited to RFQ Hub. Set a password to finish setting up your account.</p>
+          <form id="set-password-form" style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+              <label>New Password *</label>
+              <input type="password" id="set-password-new" required minlength="6" style="width:100%;">
+            </div>
+            <div>
+              <label>Confirm Password *</label>
+              <input type="password" id="set-password-confirm" required minlength="6" style="width:100%;">
+            </div>
+            <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Set Password &amp; Continue</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW (Company Dashboard) -->
+    <div id="admin-view" style="display:none;">
+      <div style="background: var(--primary); border-bottom: 3px solid var(--accent); padding: 20px 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+            <img id="admin-header-logo" src="" alt="" style="display:none; height:40px; max-width:140px; width:auto; object-fit:contain; border-radius:3px; background:white; padding:3px;">
+            <h2 id="admin-company-name" style="margin: 0; color: white; font-family: 'IBM Plex Sans', sans-serif;">RFQ Management</h2>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <a id="super-admin-link" href="#" onclick="openSuperAdminView(); return false;" style="display:none; font-size:13px; color:white; font-weight:600;">Platform Admin</a>
+            <button onclick="logoutAdmin()" class="btn secondary" style="padding: 8px 16px;">Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-pad" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+        <div class="admin-layout">
+          <!-- Section Navigation -->
+          <div class="admin-sidebar">
+            <button class="sidebar-tab-btn company-tab-btn active" onclick="switchAdminTab('create', this)">Create RFQ</button>
+            <button class="sidebar-tab-btn company-tab-btn" onclick="switchAdminTab('console', this)">RFQ Console</button>
+            <button class="sidebar-tab-btn company-tab-btn" onclick="switchAdminTab('submissions', this)">Review Submissions</button>
+            <button class="sidebar-tab-btn company-tab-btn" onclick="switchAdminTab('team', this)">Team</button>
+            <button class="sidebar-tab-btn company-tab-btn" onclick="switchAdminTab('settings', this)">Settings</button>
+            <button id="subscription-tab-btn" class="sidebar-tab-btn company-tab-btn" onclick="switchAdminTab('subscription', this)">Subscription</button>
+          </div>
+
+          <div class="admin-content">
+        <div id="subscription-banner" class="subscription-banner" style="display:none;"></div>
+        <!-- CREATE RFQ TAB -->
+        <div id="create-tab" class="admin-tab" style="display:block;">
+          <div class="card">
+            <h2 style="margin-top:0;">Create New RFQ</h2>
+            <div id="draft-editing-banner" style="display:none; margin-bottom:16px; padding:10px 14px; background:#FFF8E1; border:1px solid #F5D67A; border-radius:4px; font-size:13px; color:var(--ink);">
+              📝 <strong>Editing a saved draft</strong> — Save Draft keeps it a draft, and Save RFQ finalizes it into the Console. Nothing is sent to suppliers or contractors until you explicitly Release it there.
+            </div>
+            <form id="create-rfq-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:20px;">
+              <div class="form-grid-2">
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">RFQ Name/Title *</label>
+                  <input type="text" name="rfq_name" placeholder="e.g., Safety Equipment Quotes" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">Project Name *</label>
+                  <input type="text" name="rfq_project" placeholder="e.g., Table Bay Construction Site" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+              </div>
+
+              <div>
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">Description *</label>
+                <textarea name="rfq_description" placeholder="Describe what you're looking for..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; min-height:100px; box-sizing:border-box; font-family:inherit;"></textarea>
+              </div>
+
+              <div class="form-grid-2">
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">Province(s) *</label>
+                  <p style="font-size:12px; color:var(--border); margin:0 0 8px 0;">Select every province you want this RFQ to be visible in and to notify registered suppliers in.</p>
+                  <div style="border:1px solid var(--border); border-radius:4px; padding:12px; box-sizing:border-box;">
+                    <label style="display:flex; align-items:center; gap:8px; font-weight:600; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border); cursor:pointer;">
+                      <input type="checkbox" id="rfq-province-select-all"> Select All Provinces
+                    </label>
+                    <div id="rfq-province-checkboxes" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+                  </div>
+                </div>
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">Town / Area (optional)</label>
+                  <input type="text" name="rfq_location_area" placeholder="e.g., Table Bay, Cape Town" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+              </div>
+
+              <div style="border:2px solid var(--accent); border-radius:6px; padding:16px; background-color:rgba(245, 124, 0, 0.05); margin:16px 0;">
+                <fieldset style="border:none; margin:0; padding:0;">
+                  <legend style="font-weight:bold; margin-bottom:12px; display:block; font-size:14px;">Local Preference</legend>
+                  <p style="font-size:12px; color:var(--border); margin:0 0 12px 0;">We recommend using local labour and contractors before expanding your RFQ to other areas.</p>
+
+                  <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; margin-bottom:16px; font-weight:normal;">
+                    <input type="radio" name="rfq_local_preference" value="local" checked style="margin-top:2px;">
+                    <div>
+                      <strong style="display:block; margin-bottom:4px;">Local</strong>
+                      <span style="font-size:12px; color:var(--border); line-height:1.4;">We agree to using local labour and contractors before expanding our RFQ if no suitable resources are found locally.</span>
+                    </div>
+                  </label>
+
+                  <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; font-weight:normal;">
+                    <input type="radio" name="rfq_local_preference" value="non-local" style="margin-top:2px;">
+                    <div style="flex:1;">
+                      <strong style="display:block; margin-bottom:4px;">Non-Local</strong>
+                      <div id="non-local-reason-container" style="display:none; margin-top:8px;">
+                        <label style="font-weight:normal; display:block; margin-bottom:6px; font-size:12px;">Reason for expanding beyond local area *</label>
+                        <textarea name="rfq_non_local_reason" placeholder="Please explain why local resources are not suitable for this RFQ..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; min-height:80px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+                      </div>
+                    </div>
+                  </label>
+                </fieldset>
+              </div>
+
+              <div class="form-grid-2">
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">Submission Deadline *</label>
+                  <input type="datetime-local" name="rfq_deadline" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+                <div>
+                  <label style="font-weight:bold; display:block; margin-bottom:8px;">Budget (optional)</label>
+                  <input type="number" name="rfq_budget" placeholder="e.g., 50000" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+              </div>
+
+              <div>
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">Visibility *</label>
+                <p style="font-size:14px; color:var(--border); margin:0 0 10px 0;">Open RFQs are listed on the public portal for anyone to find and apply. Closed RFQs are only reachable via the invite links you send below.</p>
+                <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                  <label style="font-weight:normal; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="radio" name="rfq_visibility" value="closed" checked> Closed &mdash; Invite Only
+                  </label>
+                  <label style="font-weight:normal; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="radio" name="rfq_visibility" value="open"> Open &mdash; Public Portal
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">Required Documents *</label>
+                <p style="font-size:14px; color:var(--border); margin:0 0 10px 0;">Pick from the standard Supplier Database documents below, or add a one-off custom requirement. A registered supplier who already has a standard document on file gets it applied automatically — no re-upload needed.</p>
+                <div id="required-docs-builder" style="margin-bottom:10px;"></div>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+                  <select id="standard-doc-picker" style="padding:8px; border:1px solid var(--border); border-radius:4px; min-width:260px;"></select>
+                  <button type="button" onclick="addStandardDocumentFieldFromPicker()" class="btn secondary" style="padding:8px 16px;">+ Add Standard Document</button>
+                </div>
+                <button type="button" onclick="addDocumentField()" class="btn secondary" style="padding:8px 16px;">+ Add Custom Document Type</button>
+              </div>
+
+              <div>
+                <label style="font-weight:bold; display:block; margin-bottom:8px;">Attach RFQ Document(s) (optional)</label>
+                <p style="font-size:14px; color:var(--border); margin:0 0 10px 0;">Upload the RFQ spec, drawings, or any files contractors should review before applying. They'll appear as downloads on the contractor's page.</p>
+
+                <!-- Documents list (both existing and newly selected) -->
+                <div id="documents-list-section" style="margin-bottom:15px; display:none;">
+                  <div id="documents-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+
+                <!-- File input for new attachments -->
+                <input type="file" id="rfq-attachments-input" multiple style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; margin-bottom:8px;">
+                <p id="file-input-hint" style="font-size:13px; color:var(--border); margin:0;">Select files above to add them. You can remove or replace them before saving.</p>
+              </div>
+
+              <div>
+                <label id="contractor-emails-label" style="font-weight:bold; display:block; margin-bottom:8px;">Contractor Email Addresses *</label>
+                <p id="contractor-emails-hint" style="font-size:14px; color:var(--border); margin:0 0 10px 0;">Enter email addresses (one per line). Each gets a direct invite link, emailed once this RFQ is published/released — not immediately on save. Required for Closed RFQs.</p>
+                <textarea name="contractor_emails" placeholder="contractor1@example.com&#10;contractor2@example.com" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; min-height:80px; box-sizing:border-box; font-family:inherit;"></textarea>
+              </div>
+
+              <p style="font-size:13px; color:var(--border); margin:0; text-align:right;">💾 Save never makes an RFQ public or notifies anyone. 🚀 <strong>Publish RFQ</strong> is the only button that does — here, or on it later from the Console.</p>
+              <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+                <button type="button" onclick="resetCreateForm()" class="btn secondary" style="padding:10px 20px;">Clear</button>
+                <button type="button" onclick="previewRFQ()" class="btn secondary" style="padding:10px 20px;">👁️ Preview</button>
+                <button type="button" id="save-draft-btn" onclick="saveRFQDraft()" class="btn secondary" style="padding:10px 20px;">💾 Save Draft</button>
+                <button type="submit" id="create-rfq-submit-btn" class="btn navy" style="padding:10px 20px;">💾 Save RFQ</button>
+                <button type="button" id="publish-rfq-btn" onclick="createNewRFQ(true)" class="btn gold" style="padding:10px 20px;">🚀 Publish RFQ</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RFQ CONSOLE TAB -->
+        <div id="console-tab" class="admin-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Active RFQs</h2>
+            <p style="color: var(--border); font-size: 14px; margin-bottom: 20px;">View all active RFQs and manage contractor invitation links</p>
+            <div id="rfq-console-list" style="display: flex; flex-direction: column; gap: 20px;">
+              <div style="text-align: center; padding: 40px; color: var(--border);">
+                <p>Loading RFQs...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBMISSIONS TAB -->
+        <div id="submissions-tab" class="admin-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">RFQ Submissions</h2>
+            <p id="submissions-limited-access-note" style="display:none; margin:0 0 14px 0; font-size:13px; color:var(--border);">🔒 Your team permissions limit which submission stages you can see and act on here. Ask your company owner to adjust your access from the Team tab if you're missing something you expect to see.</p>
+            <div class="filter-bar">
+              <select id="rfq-filter" onchange="filterSubmissions()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All RFQs</option>
+              </select>
+              <select id="status-filter" onchange="filterSubmissions()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All Statuses</option>
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div id="submissions-list" style="display:flex; flex-direction:column; gap:15px;"></div>
+          </div>
+        </div>
+
+        <!-- TEAM TAB -->
+        <div id="team-tab" class="admin-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Team</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">People with access to this company's RFQ Hub admin section.</p>
+            <div id="team-members-list" style="margin-bottom:25px;"></div>
+
+            <h3 style="font-size:16px;">Invite a Teammate</h3>
+            <form id="invite-teammate-form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-top:10px;">
+              <div style="flex:1; min-width:220px;">
+                <label style="font-weight:bold;">Email *</label>
+                <input type="email" id="invite-teammate-email" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <button type="submit" class="btn gold" style="padding:10px 20px;">Send Invite</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings-tab" class="admin-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Company Settings</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">This information is shown to contractors on your RFQ links.</p>
+            <form id="settings-form" style="display:flex; flex-direction:column; gap:20px; max-width:600px;">
+              <div>
+                <label style="font-weight:bold;">Logo</label>
+                <div style="display:flex; align-items:center; gap:15px; margin-top:8px; flex-wrap:wrap;">
+                  <div style="width:140px; height:140px; border:1px solid var(--border); border-radius:8px; background:var(--bg-2); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                    <img id="settings-logo-preview" src="" alt="Logo preview" style="max-width:260px; height:84px; width:auto; object-fit:contain; display:none;">
+                    <span id="settings-logo-placeholder" style="color:var(--border); font-size:11px; text-align:center; padding:0 10px;">No logo</span>
+                  </div>
+                  <div>
+                    <input type="file" id="settings-logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+                    <p style="font-size:12px; color:var(--border); margin-top:5px;">PNG, JPG, SVG or WebP. Uploads immediately.</p>
+                  </div>
+                </div>
+                <div style="margin-top:14px; max-width:320px;">
+                  <label style="font-weight:bold; font-size:13px; display:flex; justify-content:space-between;">
+                    <span>Logo Size</span>
+                    <span id="settings-logo-scale-label" style="font-weight:normal; color:var(--border);">100%</span>
+                  </label>
+                  <input type="range" id="settings-logo-scale" min="50" max="150" step="5" value="100" style="width:100%;">
+                  <p style="font-size:12px; color:var(--border); margin-top:5px;">Scales your logo in the site header and on the public RFQ portal. The preview above matches the header size.</p>
+                </div>
+              </div>
+              <div>
+                <label style="font-weight:bold;">Company Name *</label>
+                <input type="text" id="settings-company-name" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">Contact Email</label>
+                <input type="email" id="settings-contact-email" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">Contact Phone</label>
+                <input type="tel" id="settings-contact-phone" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">Address</label>
+                <textarea id="settings-address" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; min-height:70px; font-family:inherit;"></textarea>
+              </div>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn gold" style="padding:10px 24px;">Save Settings</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2 style="margin-top:0;">Change Password</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">Update the password for your own login.</p>
+            <form id="change-password-form" style="display:flex; flex-direction:column; gap:15px; max-width:400px;">
+              <div>
+                <label style="font-weight:bold;">New Password *</label>
+                <input type="password" id="change-password-new" required minlength="6" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">Confirm New Password *</label>
+                <input type="password" id="change-password-confirm" required minlength="6" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn gold" style="padding:10px 24px;">Update Password</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- SUBSCRIPTION TAB (SaaS) -->
+        <div id="subscription-tab" class="admin-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Subscription</h2>
+            <div id="subscription-summary"><p style="color:var(--border);">Loading…</p></div>
+          </div>
+          <div class="card" id="subscription-plans-card">
+            <h2 style="margin-top:0;">Plans</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:16px;">Payments are processed securely by PayFast (card, Instant EFT and more). Subscriptions renew automatically. If you subscribe during your free trial, your first paid month starts when the trial ends.</p>
+            <div id="subscription-plan-options" class="pricing-grid compact"></div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0;">Payment History</h2>
+            <div id="subscription-payments"><p style="color:var(--border);">Loading…</p></div>
+          </div>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPER ADMIN VIEW (Platform-wide) -->
+    <div id="super-admin-view" style="display:none;">
+      <div style="background: var(--primary); border-bottom: 3px solid var(--accent); padding: 20px 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; flex-wrap:wrap; gap:10px;">
+          <h2 style="margin: 0; color: white; font-family: 'IBM Plex Sans', sans-serif;">Platform Admin</h2>
+          <div style="display:flex; gap:10px;">
+            <a id="back-to-dashboard-link" href="#" onclick="closeSuperAdminView(); return false;" class="btn secondary" style="padding: 8px 16px; text-decoration:none; display:inline-block;">Back to Dashboard</a>
+            <button onclick="logoutAdmin()" class="btn secondary" style="padding: 8px 16px;">Logout</button>
+          </div>
+        </div>
+      </div>
+      <div class="page-pad" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+        <div class="admin-layout">
+          <!-- Section Navigation -->
+          <div class="admin-sidebar">
+            <button id="super-invite-tab-btn" class="sidebar-tab-btn super-tab-btn active" onclick="switchSuperAdminTab('super-invite', this)">Invite a Company</button>
+            <button id="super-branding-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-branding', this)">Platform Branding</button>
+            <button id="super-companies-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-companies', this)">All Companies</button>
+            <button id="super-rfqs-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-rfqs', this)">All RFQs</button>
+            <button id="super-notify-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-notify', this)">Notifications Only</button>
+            <button id="super-applicants-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-applicants', this)">Supplier Database</button>
+            <button id="super-subscriptions-tab-btn" class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-subscriptions', this)">Subscriptions &amp; Plans</button>
+            <button id="super-manage-admins-tab-btn" class="sidebar-tab-btn super-tab-btn" style="display:none;" onclick="switchSuperAdminTab('super-manage-admins', this)">Manage Admins</button>
+            <button class="sidebar-tab-btn super-tab-btn" onclick="switchSuperAdminTab('super-password', this)">Change Password</button>
+          </div>
+
+          <div class="admin-content">
+        <div id="super-invite-tab" class="super-tab" style="display:block;">
+          <div class="card">
+            <h2 style="margin-top:0;">Invite a Company</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">Set up a contractor yourself and invite the first person who'll manage their RFQs. They'll get an email to set their own password. (Contractors can also sign up themselves for a 30-day trial from the public site.)</p>
+            <form id="invite-company-form" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+              <div style="flex:1; min-width:200px;">
+                <label style="font-weight:bold;">Company Name *</label>
+                <input type="text" id="invite-company-name" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="flex:1; min-width:220px;">
+                <label style="font-weight:bold;">First Admin's Email *</label>
+                <input type="email" id="invite-company-email" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="min-width:200px;">
+                <label style="font-weight:bold;">Access</label>
+                <select id="invite-company-access" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                  <option value="pending_payment">Must subscribe (PayFast)</option>
+                  <option value="comped">Complimentary (free, no billing)</option>
+                </select>
+              </div>
+              <button type="submit" id="invite-company-submit-btn" class="btn gold" style="padding:10px 20px;">Send Invite</button>
+            </form>
+            <p id="invite-company-readonly-note" style="display:none; margin-top:10px; font-size:13px; color:var(--border);">You have view-only access to this section.</p>
+          </div>
+        </div>
+
+        <div id="super-branding-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Platform Branding</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">This logo appears on the main public portal (the "RFQ Hub" landing page) whenever no specific company is in context.</p>
+            <p id="platform-branding-readonly-note" style="display:none; font-size:13px; color:var(--border); margin-top:-10px; margin-bottom:15px;">You have view-only access to this section.</p>
+            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+              <div style="width:140px; height:140px; border:1px solid var(--border); border-radius:8px; background:var(--bg-2); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                <img id="platform-logo-preview" src="" alt="Platform logo preview" style="max-width:260px; height:84px; width:auto; object-fit:contain; display:none;">
+                <span id="platform-logo-placeholder" style="color:var(--border); font-size:11px; text-align:center; padding:0 10px;">No logo</span>
+              </div>
+              <div>
+                <input type="file" id="platform-logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+                <p style="font-size:12px; color:var(--border); margin-top:5px;">PNG, JPG, SVG or WebP. Uploads immediately.</p>
+              </div>
+            </div>
+            <div style="margin-top:14px; max-width:320px;">
+              <label style="font-weight:bold; font-size:13px; display:flex; justify-content:space-between;">
+                <span>Logo Size</span>
+                <span id="platform-logo-scale-label" style="font-weight:normal; color:var(--border);">100%</span>
+              </label>
+              <input type="range" id="platform-logo-scale" min="50" max="150" step="5" value="100" style="width:100%;">
+              <p style="font-size:12px; color:var(--border); margin-top:5px;">Scales the platform logo in the site header. The preview above matches the header size.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="super-companies-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">All Companies</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">Companies set up on the platform.</p>
+            <div id="super-admin-companies-list"></div>
+          </div>
+        </div>
+
+        <div id="super-rfqs-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h2 style="margin-top:0; margin-bottom:4px;">All RFQs</h2>
+                <p style="color:var(--border); font-size:14px; margin-bottom:0;">Every RFQ listed on the platform, with who put it out, when it went public and when it closes. For reference only; RFQs are still managed from the issuing company's own dashboard.</p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <span id="rfq-register-count" style="font-size:13px; color:var(--border); white-space:nowrap;"></span>
+                <button type="button" class="btn secondary" style="padding:10px 16px; white-space:nowrap;" onclick="exportRFQRegisterAsCSV()">&#11015;&#65039; Download as CSV</button>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 16px 0;">
+              <input type="text" id="rfq-register-search" placeholder="Search by RFQ name, project, issuer or town..." oninput="filterSuperAdminRFQs()" style="flex:1; min-width:240px; padding:10px; border:1px solid var(--border); border-radius:4px;">
+              <select id="rfq-register-issuer-filter" onchange="filterSuperAdminRFQs()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All Issuers</option>
+              </select>
+              <select id="rfq-register-status-filter" onchange="filterSuperAdminRFQs()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+                <option value="Invite only">Invite only</option>
+                <option value="Draft">Draft</option>
+                <option value="Withdrawn">Withdrawn</option>
+              </select>
+            </div>
+            <div id="super-admin-rfqs-list"></div>
+          </div>
+        </div>
+
+        <div id="super-notify-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0; margin-bottom:4px;">Notifications Only</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">People who should be told when a new RFQ is published, without being suppliers. They receive the same notification email suppliers get, for every company on the platform. They have no login, upload no documents, and never appear in the Supplier Database.</p>
+            <form id="add-subscriber-form" onsubmit="handleAddSubscriberSubmit(event); return false;" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; padding:16px; background:var(--bg-2); border-radius:4px; margin-bottom:24px;">
+              <div style="flex:1; min-width:180px;">
+                <label style="font-weight:bold;">Name *</label>
+                <input type="text" id="subscriber-name" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="flex:1; min-width:220px;">
+                <label style="font-weight:bold;">Email Address *</label>
+                <input type="email" id="subscriber-email" required placeholder="name@company.co.za" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="min-width:180px;">
+                <label style="font-weight:bold;">Provinces</label>
+                <select id="subscriber-province" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit; box-sizing:border-box;">
+                  <option value="ALL">All provinces</option>
+                  <option value="Eastern Cape">Eastern Cape</option>
+                  <option value="Free State">Free State</option>
+                  <option value="Gauteng">Gauteng</option>
+                  <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                  <option value="Limpopo">Limpopo</option>
+                  <option value="Mpumalanga">Mpumalanga</option>
+                  <option value="Northern Cape">Northern Cape</option>
+                  <option value="North West">North West</option>
+                  <option value="Western Cape">Western Cape</option>
+                </select>
+              </div>
+              <button type="submit" id="add-subscriber-btn" class="btn gold" style="padding:10px 24px; white-space:nowrap;">Add Contact</button>
+            </form>
+            <div id="notification-subscribers-list"></div>
+          </div>
+        </div>
+
+        <div id="super-applicants-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h2 style="margin-top:0; margin-bottom:4px;">Supplier Database</h2>
+                <p style="color:var(--border); font-size:14px; margin-bottom:0;">Everyone who has registered on the RFQ Hub Supplier Database in order to view and apply to open RFQs, with their full registration details and uploaded documents.</p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" id="import-suppliers-btn" class="btn secondary" style="padding:10px 16px; white-space:nowrap;" onclick="openImportSuppliersModal()">⬆️ Import Suppliers</button>
+                <button type="button" class="btn secondary" style="padding:10px 16px; white-space:nowrap;" onclick="exportSuppliersAsCSV()">⬇️ Download as CSV</button>
+                <button type="button" class="btn secondary" style="padding:10px 16px; white-space:nowrap;" onclick="exportSuppliersAsExcel()">📊 Download as Excel</button>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 16px 0;">
+              <input type="text" id="supplier-search-input" placeholder="Search by name, company, email, or phone..." oninput="filterSupplierDatabase()" style="flex:1; min-width:220px; padding:10px; border:1px solid var(--border); border-radius:4px;">
+              <select id="supplier-province-filter" onchange="filterSupplierDatabase()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All Provinces</option>
+              </select>
+              <select id="supplier-status-filter" onchange="filterSupplierDatabase()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="removed">Removed</option>
+              </select>
+            </div>
+            <div id="super-admin-applicants-list"></div>
+          </div>
+        </div>
+
+        <input type="file" id="supplier-doc-upload-input" style="display:none;" onchange="handleSupplierDocFileSelected(event)">
+        <input type="file" id="prefs-doc-upload-input" style="display:none;" onchange="handlePrefsDocFileSelected(event)">
+
+        <div id="import-suppliers-modal" class="modal" style="display:none;">
+          <div class="modal-content" style="max-width:600px;">
+            <div class="modal-head">
+              <h3>Import Suppliers</h3>
+              <button class="drawer-close" onclick="closeModal('import-suppliers-modal')">✕</button>
+            </div>
+            <div class="modal-body">
+              <p style="margin:0 0 15px 0; font-size:13px; color:var(--border);">Upload a CSV file of your existing supplier list. Imported suppliers appear as normal active suppliers, flagged "Documents Pending" until you upload their CIPC/ID, Proof of Address, and SARS documents (via the Upload buttons on each entry) and they aren't required to have accepted the registration declaration.</p>
+              <div id="import-suppliers-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="super-manage-admins-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Manage Admins</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">Invite other people into the Super Admin section, and control exactly which sections each of them can see and change. They'll get an email to set their own password. Only you can invite/remove other admins or change their permissions.</p>
+            <form id="invite-super-admin-form" style="margin-bottom:25px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:12px;">
+                <div style="flex:1; min-width:220px;">
+                  <label style="font-weight:bold;">Email *</label>
+                  <input type="email" id="invite-super-admin-email" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                </div>
+              </div>
+              <div style="margin-bottom:15px; padding:12px; border:1px solid var(--border); border-radius:4px; background:var(--bg-2);">
+                <p style="margin:0 0 8px 0; font-size:12px; font-weight:bold; color:var(--ink);">Permissions — unchecked sections stay completely hidden from this admin</p>
+                <div style="display:grid; grid-template-columns:1fr auto auto; gap:6px 16px; align-items:center; font-size:13px;">
+                  <div></div>
+                  <div style="font-weight:600; text-align:center;">View</div>
+                  <div style="font-weight:600; text-align:center;">Edit</div>
+
+                  <div>Invite a Company</div>
+                  <input type="checkbox" id="invite-perm-invite_company-view" class="perm-checkbox" data-prefix="invite-perm" data-section="invite_company" data-level="view" style="justify-self:center;">
+                  <input type="checkbox" id="invite-perm-invite_company-edit" class="perm-checkbox" data-prefix="invite-perm" data-section="invite_company" data-level="edit" style="justify-self:center;">
+
+                  <div>Platform Branding</div>
+                  <input type="checkbox" id="invite-perm-platform_branding-view" class="perm-checkbox" data-prefix="invite-perm" data-section="platform_branding" data-level="view" style="justify-self:center;">
+                  <input type="checkbox" id="invite-perm-platform_branding-edit" class="perm-checkbox" data-prefix="invite-perm" data-section="platform_branding" data-level="edit" style="justify-self:center;">
+
+                  <div>All Companies</div>
+                  <input type="checkbox" id="invite-perm-companies-view" class="perm-checkbox" data-prefix="invite-perm" data-section="companies" data-level="view" style="justify-self:center;">
+                  <input type="checkbox" id="invite-perm-companies-edit" class="perm-checkbox" data-prefix="invite-perm" data-section="companies" data-level="edit" style="justify-self:center;">
+
+                  <div>Supplier Database</div>
+                  <input type="checkbox" id="invite-perm-applicants-view" class="perm-checkbox" data-prefix="invite-perm" data-section="applicants" data-level="view" style="justify-self:center;">
+                  <input type="checkbox" id="invite-perm-applicants-edit" class="perm-checkbox" data-prefix="invite-perm" data-section="applicants" data-level="edit" style="justify-self:center;">
+
+                  <div>Subscriptions &amp; Plans</div>
+                  <input type="checkbox" id="invite-perm-billing-view" class="perm-checkbox" data-prefix="invite-perm" data-section="billing" data-level="view" style="justify-self:center;">
+                  <input type="checkbox" id="invite-perm-billing-edit" class="perm-checkbox" data-prefix="invite-perm" data-section="billing" data-level="edit" style="justify-self:center;">
+                </div>
+                <p style="margin:8px 0 0 0; font-size:11px; color:var(--border);">"Edit" automatically includes "View". They can always change their own password regardless of these settings.</p>
+              </div>
+              <button type="submit" class="btn gold" style="padding:10px 20px;">Invite Admin</button>
+            </form>
+            <div id="super-admins-list"></div>
+
+            <div id="admin-permissions-modal" class="modal" style="display:none;">
+              <div class="modal-content" style="max-width:520px;">
+                <div class="modal-head">
+                  <h3>Edit Permissions</h3>
+                  <button class="drawer-close" onclick="closeModal('admin-permissions-modal')">✕</button>
+                </div>
+                <div class="modal-body">
+                  <input type="hidden" id="edit-perm-email">
+                  <p id="edit-perm-target-label" style="margin:0 0 12px 0; font-size:13px; color:var(--border);"></p>
+                  <div style="display:grid; grid-template-columns:1fr auto auto; gap:6px 16px; align-items:center; font-size:13px;">
+                    <div></div>
+                    <div style="font-weight:600; text-align:center;">View</div>
+                    <div style="font-weight:600; text-align:center;">Edit</div>
+
+                    <div>Invite a Company</div>
+                    <input type="checkbox" id="edit-perm-invite_company-view" class="perm-checkbox" data-prefix="edit-perm" data-section="invite_company" data-level="view" style="justify-self:center;">
+                    <input type="checkbox" id="edit-perm-invite_company-edit" class="perm-checkbox" data-prefix="edit-perm" data-section="invite_company" data-level="edit" style="justify-self:center;">
+
+                    <div>Platform Branding</div>
+                    <input type="checkbox" id="edit-perm-platform_branding-view" class="perm-checkbox" data-prefix="edit-perm" data-section="platform_branding" data-level="view" style="justify-self:center;">
+                    <input type="checkbox" id="edit-perm-platform_branding-edit" class="perm-checkbox" data-prefix="edit-perm" data-section="platform_branding" data-level="edit" style="justify-self:center;">
+
+                    <div>All Companies</div>
+                    <input type="checkbox" id="edit-perm-companies-view" class="perm-checkbox" data-prefix="edit-perm" data-section="companies" data-level="view" style="justify-self:center;">
+                    <input type="checkbox" id="edit-perm-companies-edit" class="perm-checkbox" data-prefix="edit-perm" data-section="companies" data-level="edit" style="justify-self:center;">
+
+                    <div>Supplier Database</div>
+                    <input type="checkbox" id="edit-perm-applicants-view" class="perm-checkbox" data-prefix="edit-perm" data-section="applicants" data-level="view" style="justify-self:center;">
+                    <input type="checkbox" id="edit-perm-applicants-edit" class="perm-checkbox" data-prefix="edit-perm" data-section="applicants" data-level="edit" style="justify-self:center;">
+
+                    <div>Subscriptions &amp; Plans</div>
+                    <input type="checkbox" id="edit-perm-billing-view" class="perm-checkbox" data-prefix="edit-perm" data-section="billing" data-level="view" style="justify-self:center;">
+                    <input type="checkbox" id="edit-perm-billing-edit" class="perm-checkbox" data-prefix="edit-perm" data-section="billing" data-level="edit" style="justify-self:center;">
+                  </div>
+                  <p style="margin:8px 0 15px 0; font-size:11px; color:var(--border);">"Edit" automatically includes "View". They can always change their own password regardless of these settings.</p>
+                  <button type="button" class="btn gold" style="padding:10px 20px;" onclick="handleSaveAdminPermissions()">Save Permissions</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- SUBSCRIPTIONS & PLANS (SaaS) -->
+        <div id="super-subscriptions-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h2 style="margin-top:0; margin-bottom:4px;">Contractor Subscriptions</h2>
+                <p style="color:var(--border); font-size:14px; margin:0;">Every contractor company, its plan and billing status. Use <strong>Manage</strong> to comp, extend, suspend or change a plan by hand (e.g. EFT payers).</p>
+              </div>
+              <div id="super-subs-stats" class="super-subs-stats"></div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 14px 0;">
+              <input type="text" id="super-subs-search" placeholder="Search company or email..." oninput="renderSuperSubscriptions()" style="flex:1; min-width:220px; padding:10px; border:1px solid var(--border); border-radius:4px;">
+              <select id="super-subs-status-filter" onchange="renderSuperSubscriptions()" style="padding:10px; border:1px solid var(--border); border-radius:4px;">
+                <option value="">All statuses</option>
+                <option value="trialing">Trial</option>
+                <option value="active">Active</option>
+                <option value="past_due">Payment failed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="pending_payment">Awaiting payment</option>
+                <option value="comped">Complimentary</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+            <div id="super-subs-list"><p style="color:var(--border);">Loading…</p></div>
+          </div>
+
+          <div class="card">
+            <h2 style="margin-top:0;">Plans &amp; Pricing</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:16px;">What contractors see on the public pricing section and their Subscription tab. Price changes apply to <strong>new</strong> subscriptions; existing PayFast subscribers keep the amount they signed up at.</p>
+            <div id="super-plans-list"></div>
+          </div>
+
+          <div class="card">
+            <h2 style="margin-top:0;">PayFast Notifications Log</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:16px;">The last 50 payment notifications PayFast sent. Use this if a contractor says they paid but their account didn't activate.</p>
+            <div id="super-itn-log"></div>
+          </div>
+        </div>
+
+        <div id="super-password-tab" class="super-tab" style="display:none;">
+          <div class="card">
+            <h2 style="margin-top:0;">Change Password</h2>
+            <p style="color:var(--border); font-size:14px; margin-bottom:20px;">Update the password for your own (platform admin) login.</p>
+            <form id="super-change-password-form" style="display:flex; flex-direction:column; gap:15px; max-width:400px;">
+              <div>
+                <label style="font-weight:bold;">New Password *</label>
+                <input type="password" id="super-change-password-new" required minlength="6" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">Confirm New Password *</label>
+                <input type="password" id="super-change-password-confirm" required minlength="6" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+              </div>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn gold" style="padding:10px 24px;">Update Password</button>
+              </div>
+            </form>
+          </div>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SITE FOOTER -->
+    <footer id="site-footer" class="site-footer">
+      <div class="footer-columns">
+        <div class="footer-col">
+          <h5>Platform</h5>
+          <a href="#" onclick="navGoOpportunities(); return false;">Opportunities</a>
+          <a href="#" onclick="navGoHowItWorks(); return false;">How It Works</a>
+          <a href="#" onclick="navGoAbout(); return false;">About</a>
+        </div>
+        <div class="footer-col">
+          <h5>Contractors</h5>
+          <a href="#" onclick="navGoPricing(); return false;">Plans &amp; Pricing</a>
+          <a href="#" onclick="openContractorSignup(); return false;">Start Free Trial</a>
+        </div>
+        <div class="footer-col">
+          <h5>Suppliers</h5>
+          <a href="#" onclick="openApplicantGate(null); return false;">Register</a>
+          <a href="#" onclick="showLoginForm(); return false;">Sign In</a>
+          <a href="#" onclick="navGoHelp(); return false;">Help</a>
+        </div>
+        <div class="footer-col">
+          <h5>Legal</h5>
+          <a href="#" onclick="openModal('popia-modal'); return false;">Privacy Policy</a>
+          <a href="#" onclick="navGoTerms(); return false;">Terms &amp; Conditions</a>
+        </div>
+        <div class="footer-col">
+          <h5>Contact</h5>
+          <a href="mailto:enquiries@ihub-sa.co.za">enquiries@ihub-sa.co.za</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p style="margin:0 0 8px 0; font-size:12px; color:#8FA4BE; font-family:'IBM Plex Sans', sans-serif;">&copy; <span id="footer-year"></span> <span id="footer-company-name">RFQ Hub</span>. All rights reserved.</p>
+        <p style="margin:0; font-size:12px; color:#8FA4BE; font-family:'IBM Plex Sans', sans-serif; display:flex; align-items:center; justify-content:center; gap:6px;">
+          Powered by
+          <svg width="16" height="16" viewBox="0 0 100 100" aria-hidden="true" style="flex-shrink:0;">
+            <circle cx="50" cy="50" r="46" fill="#FFFFFF"/>
+            <text x="50" y="68" font-family="'IBM Plex Sans', sans-serif" font-size="52" font-weight="bold" fill="#F57C00" text-anchor="middle">i</text>
+          </svg>
+          <strong style="color:#C7D8EA;">ihubSA</strong>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- SUBMISSION DETAIL MODAL -->
+  <div id="submission-detail-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3 id="submission-title">Submission Details</h3>
+        <button class="drawer-close" onclick="closeModal('submission-detail-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="submission-details-content"></div>
+        <div id="submission-info-request-box" style="display:none; margin-top:20px; padding:15px; background:#FFF8E1; border-radius:4px; border-left:3px solid #B8860B;">
+          <h4 style="margin:0 0 8px 0;">Information Requested</h4>
+          <p id="submission-info-request-text" style="margin:0 0 6px 0; white-space:pre-wrap;"></p>
+          <p id="submission-info-request-date" style="margin:0; font-size:12px; color:var(--border);"></p>
+        </div>
+        <div id="submission-info-response-box" style="display:none; margin-top:20px; padding:15px; background:#E1F0FF; border-radius:4px; border-left:3px solid #0F3557;">
+          <h4 style="margin:0 0 8px 0;">Contractor's Response</h4>
+          <p id="submission-info-response-text" style="margin:0 0 6px 0; white-space:pre-wrap;"></p>
+          <p id="submission-info-response-date" style="margin:0; font-size:12px; color:var(--border);"></p>
+        </div>
+        <div style="margin-top:30px; padding-top:20px; border-top:1px solid var(--border);">
+          <h4>Uploaded Documents</h4>
+          <div id="submission-documents-list"></div>
+        </div>
+      </div>
+      <div id="submission-info-request-form" style="display:none; padding:0 24px 20px 24px;">
+        <label style="font-weight:bold; font-size:12px; text-transform:uppercase; color:var(--ink);">What information do you need from the contractor?</label>
+        <textarea id="submission-info-request-message" rows="3" style="width:100%; margin-top:6px; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit;" placeholder="e.g. Please upload your latest B-BBEE certificate and confirm your VAT number."></textarea>
+      </div>
+      <p id="submission-status-no-access-note" style="display:none; margin:0 24px 12px 24px; font-size:12px; color:var(--border); text-align:right;">🔒 You don't have permission to change this submission's status. Ask your company owner to grant you access from the Team tab.</p>
+      <div class="modal-foot">
+        <button type="button" class="btn secondary" onclick="closeModal('submission-detail-modal')">Close</button>
+        <select id="submission-status-update" onchange="onSubmissionStatusSelectChange()" style="padding:8px 12px; border:1px solid var(--border); border-radius:4px;">
+          <option value="submitted">Submitted</option>
+          <option value="under_review">Under Review</option>
+          <option value="info_requested">Request More Information</option>
+          <option value="response_received">Response Received</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button type="button" id="submission-status-action-btn" class="btn gold" onclick="handleSubmissionStatusAction()">Update Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM MEMBER SUBMISSION-STAGE PERMISSIONS MODAL -->
+  <div id="team-permissions-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-head">
+        <h3>Review Submissions Permissions</h3>
+        <button class="drawer-close" onclick="closeModal('team-permissions-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="team-permissions-member-label" style="margin:0 0 14px 0; font-size:13px; color:var(--border);"></p>
+        <p style="margin:0 0 14px 0; font-size:13px; color:var(--border);">Control which submission stages this teammate can see and act on. "Edit" automatically includes "View".</p>
+        <div id="team-permissions-grid"></div>
+        <p style="margin:12px 0 18px 0; font-size:11px; color:var(--border);">A teammate you've never restricted has full access to every stage by default.</p>
+        <button type="button" class="btn gold" style="padding:10px 20px;" onclick="handleTeamPermissionsSave()">Save Permissions</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATED LINKS MODAL -->
+  <div id="generated-links-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:600px;">
+      <div class="modal-head">
+        <h3>RFQ Links Created</h3>
+        <button class="drawer-close" onclick="closeModal('generated-links-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--border); margin-bottom:15px;">Below are the unique submission links for each contractor. Copy and send these via email:</p>
+        <div id="generated-links-list"></div>
+        <p style="font-size:12px; color:var(--border); margin-top:15px; font-style:italic;">Each link is unique to a contractor and can only be used once to prevent duplicate submissions.</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn secondary" onclick="closeModal('generated-links-modal')">Done</button>
+        <button type="button" class="btn gold" onclick="copyAllLinks()">Copy All Links</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RFQ PREVIEW MODAL -->
+  <div id="rfq-preview-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:700px;">
+      <div class="modal-head">
+        <h3>RFQ Preview</h3>
+        <button class="drawer-close" onclick="closeModal('rfq-preview-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="rfq-preview-body"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn secondary" onclick="closeModal('rfq-preview-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPIA CONSENT MODAL -->
+  <div id="popia-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>Privacy Notice</h3>
+      </div>
+      <div class="modal-body">
+        <p>This RFQ system collects your company information to process your quotation submission. Your data will be handled in accordance with applicable privacy laws.</p>
+        <p>By proceeding, you consent to the processing of your personal and company information.</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn gold" onclick="acceptPOPIA()">Accept & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPLIER REGISTRATION PRIVACY POPUP -->
+  <div id="registration-privacy-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>Your information is protected</h3>
+        <button class="drawer-close" onclick="closeModal('registration-privacy-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 24px; line-height: 1.6; color: #495057;">
+        <p style="margin: 0 0 16px 0;">Before you register, please note: the personal and business information you submit — including your contact details, company registration number, and any documents you upload — is collected by <strong id="privacy-company-name">the Company</strong> to evaluate your business and process your supplier registration.</p>
+        <p style="margin: 0 0 16px 0;">Your information is handled in accordance with South Africa's <strong>Protection of Personal Information Act (POPIA)</strong>. It is used only for supplier qualification purposes and is not shared with unauthorised third parties.</p>
+        <p style="margin: 0;">By proceeding, you acknowledge and accept these terms.</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn gold" onclick="acceptRegistrationPrivacy()">I understand — continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RFQ APPLICATION PRIVACY POPUP -->
+  <div id="application-privacy-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>Your information is protected</h3>
+        <button class="drawer-close" onclick="closeModal('application-privacy-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 24px; line-height: 1.6; color: #495057;">
+        <p style="margin: 0 0 16px 0;">Before you submit your application, please note: the personal and business information you submit — including your proposal, pricing, contact details, and any documents you upload — will be shared with <strong id="privacy-rfq-company-name">the Company</strong> to evaluate your quotation and proposal.</p>
+        <p style="margin: 0 0 16px 0;">Your information is handled in accordance with South Africa's <strong>Protection of Personal Information Act (POPIA)</strong>. It is used only for procurement evaluation purposes and is not shared with unauthorised third parties.</p>
+        <p style="margin: 0;">By proceeding, you acknowledge and accept these terms.</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn gold" onclick="acceptApplicationPrivacy()">I understand — continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMS & CONDITIONS MODAL -->
+  <div id="terms-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:760px;">
+      <div class="modal-head">
+        <h3>Terms &amp; Conditions</h3>
+        <button class="drawer-close" onclick="closeModal('terms-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="font-size:14px; line-height:1.6;">
+              <p style="color:var(--border); font-size:13px;"><strong>Effective Date:</strong> 01 August 2026<br><strong>Last Updated:</strong> 19 August 2026</p>
+              <h4>1. Introduction</h4>
+              <p>These Terms and Conditions (&quot;Terms&quot;) govern access to and use of the iHubSA RFQ Platform (&quot;the Platform&quot;), operated by <strong>iHubSA</strong> (&quot;iHubSA&quot;, &quot;we&quot;, &quot;us&quot; or &quot;our&quot;).</p>
+              <p>The Platform provides an online facility through which contractors, businesses, organisations and other authorised users (&quot;RFQ Publishers&quot;) may publish Requests for Quotation (&quot;RFQs&quot;) and through which suppliers, contractors and members of the public (&quot;Respondents&quot;) may view and respond to those RFQs.</p>
+              <p>By accessing, registering for, submitting information to, publishing an RFQ on, or otherwise using the Platform, you acknowledge that you have read, understood and agreed to these Terms.</p>
+              <p>If you do not agree to these Terms, you must not use the Platform.</p>
+              <h4>2. Definitions</h4>
+              <p>For purposes of these Terms:</p>
+              <p><strong>&quot;iHubSA&quot;</strong> means the owner and/or operator of the iHubSA RFQ Platform.</p>
+              <p><strong>&quot;Platform&quot;</strong> means the website, software, applications, databases, systems and related services through which iHubSA provides its RFQ services.</p>
+              <p><strong>&quot;RFQ&quot;</strong> means a Request for Quotation published through the Platform seeking quotations, proposals, prices or expressions of interest for goods or services.</p>
+              <p><strong>&quot;RFQ Publisher&quot;</strong> means the person, contractor, business, organisation or other entity that creates and publishes an RFQ.</p>
+              <p><strong>&quot;Respondent&quot;</strong> means any person, supplier, contractor, business or organisation that submits information, a quotation, proposal or other response to an RFQ.</p>
+              <p><strong>&quot;User&quot;</strong> means any person who accesses or uses the Platform, including RFQ Publishers and Respondents.</p>
+              <p><strong>&quot;Personal Information&quot;</strong> has the meaning given to it under the Protection of Personal Information Act 4 of 2013 (&quot;POPIA&quot;).</p>
+              <h4>3. Nature of the Platform</h4>
+              <p>3.1 iHubSA operates the Platform as an electronic communication and RFQ facilitation platform.</p>
+              <p>3.2 iHubSA does not itself necessarily purchase the goods or services described in an RFQ.</p>
+              <p>3.3 iHubSA does not necessarily provide the goods or services described in an RFQ.</p>
+              <p>3.4 Unless expressly agreed otherwise in writing, iHubSA is <strong>not a party to any contract, quotation, purchase order, service agreement or other agreement entered into between an RFQ Publisher and a Respondent</strong>.</p>
+              <p>3.5 Any contract resulting from an RFQ is solely between the relevant RFQ Publisher and the successful Respondent.</p>
+              <p>3.6 iHubSA does not guarantee that:</p>
+              <ul>
+                <li>an RFQ will result in any quotations;</li>
+                <li>any Respondent will be appointed;</li>
+                <li>any quotation will be accepted;</li>
+                <li>an RFQ Publisher will proceed with the procurement;</li>
+                <li>a Respondent will be capable of performing the required work;</li>
+                <li>goods or services will be supplied;</li>
+                <li>payment will be made;</li>
+                <li>the quoted price will remain valid; or</li>
+                <li>a contract will ultimately be concluded between the parties.</li>
+              </ul>
+              <h4>4. RFQ Publisher Responsibilities</h4>
+              <p>4.1 An RFQ Publisher is solely responsible for the accuracy, completeness and legality of every RFQ published through the Platform.</p>
+              <p>4.2 An RFQ Publisher warrants that information submitted to the Platform is, to the best of its knowledge, accurate, complete and not misleading.</p>
+              <p>4.3 An RFQ Publisher must not publish an RFQ containing:</p>
+              <ul>
+                <li>knowingly false or misleading information;</li>
+                <li>fraudulent information;</li>
+                <li>unlawful requirements;</li>
+                <li>defamatory statements;</li>
+                <li>discriminatory or unlawful content;</li>
+                <li>information intended to deceive Respondents;</li>
+                <li>confidential information that the Publisher is not authorised to disclose;</li>
+                <li>another person&#x27;s Personal Information without an appropriate lawful basis; or</li>
+                <li>content that infringes another person&#x27;s intellectual property rights.</li>
+              </ul>
+              <p>4.4 The RFQ Publisher is responsible for ensuring that it has all necessary authority to publish the RFQ and to disclose the information contained within it.</p>
+              <p>4.5 iHubSA does not independently verify the accuracy, legality, legitimacy, financial standing, authority or identity of every RFQ Publisher.</p>
+              <h4>5. False, Misleading or Fraudulent Information</h4>
+              <p>5.1 Users are strictly prohibited from submitting false, fraudulent, deceptive or materially misleading information to the Platform.</p>
+              <p>5.2 This includes, but is not limited to:</p>
+              <ul>
+                <li>false company information;</li>
+                <li>false contact details;</li>
+                <li>false business registration information;</li>
+                <li>false qualifications;</li>
+                <li>false certifications;</li>
+                <li>false references;</li>
+                <li>false pricing;</li>
+                <li>fictitious RFQs;</li>
+                <li>misleading descriptions of goods or services;</li>
+                <li>impersonation of another person or organisation; and</li>
+                <li>deliberately misleading another User.</li>
+              </ul>
+              <p>5.3 The User who submits information remains solely responsible for that information.</p>
+              <p>5.4 <strong>iHubSA accepts no responsibility or liability for false, inaccurate, incomplete, misleading, fraudulent or unlawful information submitted by any User.</strong></p>
+              <p>5.5 iHubSA may, where reasonably necessary, suspend, remove or restrict access to content or accounts where it reasonably believes that information may be false, fraudulent, unlawful or otherwise in breach of these Terms.</p>
+              <p>5.6 iHubSA may cooperate with law enforcement authorities or other competent authorities where required or permitted by law.</p>
+              <h4>6. Respondent Responsibilities</h4>
+              <p>6.1 Respondents are solely responsible for the quotations, proposals, prices, information and documentation they submit.</p>
+              <p>6.2 A Respondent must ensure that all information submitted is accurate and current.</p>
+              <p>6.3 A Respondent must only submit a quotation where it has the capability, authority and intention to provide the goods or services described.</p>
+              <p>6.4 A Respondent must independently satisfy itself regarding:</p>
+              <ul>
+                <li>the identity of the RFQ Publisher;</li>
+                <li>the requirements of the RFQ;</li>
+                <li>the location of the work;</li>
+                <li>specifications;</li>
+                <li>quantities;</li>
+                <li>deadlines;</li>
+                <li>applicable laws and regulations;</li>
+                <li>payment arrangements;</li>
+                <li>contractual terms; and</li>
+                <li>any other matter relevant to the proposed transaction.</li>
+              </ul>
+              <p>6.5 Respondents are encouraged to perform their own due diligence before entering into any agreement or providing goods or services.</p>
+              <h4>7. No Verification or Endorsement</h4>
+              <p>7.1 Unless expressly stated otherwise, iHubSA does not represent or warrant that any User, RFQ Publisher or Respondent:</p>
+              <ul>
+                <li>is properly registered;</li>
+                <li>is financially sound;</li>
+                <li>is suitably qualified;</li>
+                <li>possesses the required licences;</li>
+                <li>possesses the required experience;</li>
+                <li>is insured;</li>
+                <li>is able to perform the required work;</li>
+                <li>will honour a quotation;</li>
+                <li>will make payment; or</li>
+                <li>will comply with any agreement entered into with another User.</li>
+              </ul>
+              <p>7.2 Publication of an RFQ or quotation on the Platform does not constitute an endorsement, recommendation, certification or guarantee by iHubSA.</p>
+              <p>7.3 Users must conduct their own due diligence before entering into any commercial relationship.</p>
+              <h4>8. Contracts Between Users</h4>
+              <p>8.1 Any agreement resulting from an RFQ is concluded directly between the RFQ Publisher and the successful Respondent.</p>
+              <p>8.2 iHubSA is not responsible for negotiating, drafting, enforcing or administering contracts between Users unless expressly engaged to provide such services under a separate written agreement.</p>
+              <p>8.3 iHubSA accepts no responsibility for:</p>
+              <ul>
+                <li>non-performance;</li>
+                <li>defective goods;</li>
+                <li>defective workmanship;</li>
+                <li>delays;</li>
+                <li>non-payment;</li>
+                <li>overcharging;</li>
+                <li>underquoting;</li>
+                <li>cancellation;</li>
+                <li>breach of contract;</li>
+                <li>disputes;</li>
+                <li>damages;</li>
+                <li>losses;</li>
+                <li>injuries;</li>
+                <li>theft;</li>
+                <li>fraud; or</li>
+                <li>any other dispute between an RFQ Publisher and Respondent.</li>
+              </ul>
+              <p>8.4 Users are responsible for resolving disputes arising from their own commercial relationships.</p>
+              <h4>9. Pricing and Quotations</h4>
+              <p>9.1 Prices displayed or submitted through the Platform are provided by the relevant User.</p>
+              <p>9.2 iHubSA does not guarantee the accuracy of any price.</p>
+              <p>9.3 iHubSA does not guarantee that a quotation represents the lowest, highest, best or most appropriate price.</p>
+              <p>9.4 Users remain responsible for checking whether quotations include applicable taxes, delivery charges, labour, materials, exclusions, VAT, fees or other costs.</p>
+              <p>9.5 Unless expressly stated otherwise, iHubSA does not participate in the selection of the successful quotation.</p>
+              <h4>10. Platform Availability</h4>
+              <p>10.1 iHubSA will make reasonable efforts to maintain the availability of the Platform.</p>
+              <p>10.2 However, iHubSA does not guarantee uninterrupted or error-free operation.</p>
+              <p>10.3 The Platform may occasionally be unavailable because of:</p>
+              <ul>
+                <li>maintenance;</li>
+                <li>upgrades;</li>
+                <li>technical failures;</li>
+                <li>hosting failures;</li>
+                <li>telecommunications failures;</li>
+                <li>internet outages;</li>
+                <li>cybersecurity incidents;</li>
+                <li>third-party service failures;</li>
+                <li>software errors; or</li>
+                <li>circumstances beyond iHubSA&#x27;s reasonable control.</li>
+              </ul>
+              <p>10.4 iHubSA will not be responsible for losses resulting from the temporary unavailability of the Platform, to the extent permitted by applicable law.</p>
+              <h4>11. Third-Party Services</h4>
+              <p>11.1 The Platform may rely on third-party services, including hosting providers, database providers, email providers, authentication services, payment providers and other technology providers.</p>
+              <p>11.2 iHubSA is not responsible for failures or interruptions caused by third-party service providers where such failure is outside iHubSA&#x27;s reasonable control.</p>
+              <p>11.3 Links to external websites or services may be provided for convenience.</p>
+              <p>11.4 iHubSA does not endorse or accept responsibility for the content, accuracy, security, availability or practices of third-party websites or services.</p>
+              <h4>12. POPIA and Protection of Personal Information</h4>
+              <p>12.1 iHubSA recognises the importance of protecting Personal Information and will take reasonable measures to process Personal Information in accordance with the <strong>Protection of Personal Information Act 4 of 2013 (POPIA)</strong> and other applicable South African legislation.</p>
+              <p>12.2 Personal Information may include information such as:</p>
+              <ul>
+                <li>names;</li>
+                <li>contact details;</li>
+                <li>email addresses;</li>
+                <li>telephone numbers;</li>
+                <li>business information;</li>
+                <li>identification or registration information;</li>
+                <li>information contained in submitted documents; and</li>
+                <li>other information capable of identifying an individual.</li>
+              </ul>
+              <p>12.3 Personal Information may be collected and processed for purposes including:</p>
+              <ul>
+                <li>creating and administering User accounts;</li>
+                <li>publishing and administering RFQs;</li>
+                <li>facilitating communication between Users;</li>
+                <li>receiving and processing quotations;</li>
+                <li>providing Platform functionality;</li>
+                <li>maintaining records;</li>
+                <li>preventing fraud and misuse;</li>
+                <li>maintaining Platform security;</li>
+                <li>complying with legal obligations; and</li>
+                <li>communicating with Users regarding the Platform.</li>
+              </ul>
+              <p>12.4 iHubSA will endeavour to process Personal Information lawfully, reasonably and transparently and only for purposes that are compatible with the purposes for which the information was collected.</p>
+              <p>12.5 Users must not submit another person&#x27;s Personal Information to the Platform unless they have a lawful basis or appropriate authority to do so.</p>
+              <p>12.6 Users remain responsible for ensuring that Personal Information they submit to the Platform has been lawfully obtained and may lawfully be disclosed.</p>
+              <p>12.7 iHubSA may use appropriate third-party technology and service providers to store, process or transmit information on its behalf. Where applicable, iHubSA will take reasonable steps to ensure that appropriate safeguards are implemented.</p>
+              <p>12.8 iHubSA will take reasonable technical and organisational measures designed to protect Personal Information against loss, damage, unauthorised access, unlawful processing and other reasonably foreseeable risks.</p>
+              <p>12.9 No internet-based system can be guaranteed to be completely secure. Users acknowledge that electronic transmission and storage of information carries inherent risks.</p>
+              <p>12.10 Users may have rights under POPIA regarding their Personal Information, including rights relating to access, correction, objection and other rights provided by applicable law.</p>
+              <p>12.11 A separate <strong>Privacy Policy</strong> should be read together with these Terms and provides further information regarding the collection and processing of Personal Information.</p>
+              <h4>13. Data Submitted by Users</h4>
+              <p>13.1 By submitting information to the Platform, the User grants iHubSA permission to process and use that information for the purposes necessary to operate, maintain and improve the Platform and provide the relevant RFQ services.</p>
+              <p>13.2 Users must ensure that documents and information uploaded to the Platform do not contain unnecessary Personal Information belonging to third parties.</p>
+              <p>13.3 iHubSA reserves the right to remove information where reasonably necessary to protect Users, comply with applicable law, protect the Platform or prevent misuse.</p>
+              <h4>14. Prohibited Use</h4>
+              <p>Users may not use the Platform to:</p>
+              <ul>
+                <li>commit or facilitate fraud;</li>
+                <li>impersonate another person or organisation;</li>
+                <li>submit false information;</li>
+                <li>distribute malicious software;</li>
+                <li>interfere with the operation of the Platform;</li>
+                <li>attempt to gain unauthorised access to systems or accounts;</li>
+                <li>collect information about other Users unlawfully;</li>
+                <li>distribute spam;</li>
+                <li>publish unlawful, defamatory or threatening content;</li>
+                <li>infringe intellectual property rights;</li>
+                <li>conduct unlawful activities;</li>
+                <li>manipulate RFQs or quotations dishonestly;</li>
+                <li>submit multiple fraudulent quotations;</li>
+                <li>interfere with another User&#x27;s procurement process; or</li>
+                <li>otherwise misuse the Platform.</li>
+              </ul>
+              <h4>15. Account Security</h4>
+              <p>15.1 Where User accounts are provided, Users are responsible for maintaining the confidentiality of their login credentials.</p>
+              <p>15.2 Users must immediately notify iHubSA if they suspect that their account has been compromised.</p>
+              <p>15.3 Users are responsible for activities undertaken through their account unless they can demonstrate that such activity occurred without their authorisation and despite reasonable security measures.</p>
+              <h4>16. Intellectual Property</h4>
+              <p>16.1 Unless otherwise stated, the Platform, including its software, design, branding, layout, graphics, databases, functionality and original content, remains the property of iHubSA or its licensors.</p>
+              <p>16.2 Users may not copy, reproduce, modify, distribute, sell, reverse engineer or commercially exploit the Platform or its underlying technology without prior written permission.</p>
+              <p>16.3 Users retain ownership of content and information they submit to the Platform, subject to the rights necessary for iHubSA to operate the Platform.</p>
+              <h4>17. Content Moderation and Removal</h4>
+              <p>17.1 iHubSA reserves the right, but does not assume an obligation, to review, restrict, suspend or remove content that it reasonably believes:</p>
+              <ul>
+                <li>breaches these Terms;</li>
+                <li>is unlawful;</li>
+                <li>is fraudulent;</li>
+                <li>is misleading;</li>
+                <li>infringes third-party rights;</li>
+                <li>creates a security risk;</li>
+                <li>contains inappropriate or harmful material; or</li>
+                <li>may expose iHubSA or another User to legal liability.</li>
+              </ul>
+              <p>17.2 iHubSA is not required to monitor every RFQ, quotation, message, document or other item submitted to the Platform.</p>
+              <h4>18. Disclaimer</h4>
+              <p>18.1 The Platform is provided on an <strong>&quot;as available&quot;</strong> and <strong>&quot;as is&quot;</strong> basis to the maximum extent permitted by applicable law.</p>
+              <p>18.2 iHubSA makes no guarantee that information submitted by Users is accurate, complete, reliable or current.</p>
+              <p>18.3 iHubSA does not guarantee that the Platform will always be available, secure, uninterrupted or free from errors.</p>
+              <p>18.4 Users use the Platform and rely on information obtained through it at their own risk.</p>
+              <p>18.5 Users are responsible for independently verifying information before relying upon it for commercial, financial, legal or other purposes.</p>
+              <h4>19. Limitation of Liability</h4>
+              <p>19.1 To the maximum extent permitted by South African law, iHubSA, its owners, directors, employees, contractors, service providers and agents shall not be liable for any loss, damage, cost, claim or expense arising directly or indirectly from:</p>
+              <ul>
+                <li>inaccurate information submitted by a User;</li>
+                <li>false or fraudulent information;</li>
+                <li>reliance on an RFQ;</li>
+                <li>reliance on a quotation;</li>
+                <li>a failure to receive a quotation;</li>
+                <li>acceptance or rejection of a quotation;</li>
+                <li>non-payment;</li>
+                <li>non-performance;</li>
+                <li>defective goods or services;</li>
+                <li>breach of contract between Users;</li>
+                <li>fraud committed by another User;</li>
+                <li>disputes between Users;</li>
+                <li>loss of business;</li>
+                <li>loss of profits;</li>
+                <li>loss of revenue;</li>
+                <li>loss of opportunity;</li>
+                <li>loss of data;</li>
+                <li>interruption of business;</li>
+                <li>cybersecurity incidents, except to the extent caused by iHubSA&#x27;s failure to comply with a legal obligation applicable to it;</li>
+                <li>Platform downtime;</li>
+                <li>third-party services; or</li>
+                <li>any other transaction or relationship between Users.</li>
+              </ul>
+              <p>19.2 Nothing in these Terms is intended to exclude or limit any liability that cannot lawfully be excluded or limited under applicable South African law.</p>
+              <p>19.3 Where any limitation or exclusion of liability in these Terms is found to be unenforceable, that provision shall be interpreted to the maximum extent permitted by law and the remaining provisions shall continue to apply.</p>
+              <h4>20. Indemnity</h4>
+              <p>20.1 To the maximum extent permitted by law, a User agrees to indemnify and hold harmless iHubSA, its owners, directors, employees, contractors, agents and service providers against claims, losses, damages, costs and expenses arising from:</p>
+              <ul>
+                <li>the User&#x27;s breach of these Terms;</li>
+                <li>false or misleading information submitted by the User;</li>
+                <li>fraudulent activity;</li>
+                <li>unlawful conduct;</li>
+                <li>infringement of third-party rights;</li>
+                <li>misuse of the Platform;</li>
+                <li>breach of confidentiality or privacy obligations;</li>
+                <li>breach of an agreement with another User; or</li>
+                <li>any claim arising from goods or services offered, supplied or procured by the User.</li>
+              </ul>
+              <p>20.2 This indemnity does not apply to the extent that applicable law prohibits such indemnification.</p>
+              <h4>21. Reporting Misuse</h4>
+              <p>Users are encouraged to notify iHubSA of suspected:</p>
+              <ul>
+                <li>fraud;</li>
+                <li>false RFQs;</li>
+                <li>fraudulent quotations;</li>
+                <li>impersonation;</li>
+                <li>unlawful content;</li>
+                <li>privacy violations;</li>
+                <li>security vulnerabilities; or</li>
+                <li>other misuse of the Platform.</li>
+              </ul>
+              <p>Reports should be submitted through the contact details provided on the Platform.</p>
+              <p>iHubSA may investigate reports at its discretion and may take appropriate action where reasonably necessary.</p>
+              <h4>22. Suspension and Termination</h4>
+              <p>22.1 iHubSA may suspend or terminate access to the Platform where it reasonably believes that a User:</p>
+              <ul>
+                <li>has breached these Terms;</li>
+                <li>has submitted fraudulent information;</li>
+                <li>has misused the Platform;</li>
+                <li>presents a security risk;</li>
+                <li>has engaged in unlawful conduct; or</li>
+                <li>has otherwise acted in a manner that may adversely affect iHubSA or other Users.</li>
+              </ul>
+              <p>22.2 iHubSA may also suspend access where necessary for security, maintenance or legal reasons.</p>
+              <p>22.3 Suspension or termination does not affect rights or obligations that arose before termination.</p>
+              <h4>23. Changes to These Terms</h4>
+              <p>23.1 iHubSA may update these Terms from time to time.</p>
+              <p>23.2 Updated Terms will be published on the Platform with an updated effective date.</p>
+              <p>23.3 Continued use of the Platform following publication of updated Terms constitutes acceptance of the revised Terms, to the extent permitted by law.</p>
+              <h4>24. Governing Law</h4>
+              <p>24.1 These Terms are governed by the laws of the <strong>Republic of South Africa</strong>.</p>
+              <p>24.2 Any dispute concerning these Terms shall, subject to applicable law, be subject to the jurisdiction of the appropriate courts of South Africa.</p>
+              <h4>25. Severability</h4>
+              <p>If any provision of these Terms is found to be unlawful, invalid or unenforceable, that provision shall be interpreted or modified to the minimum extent necessary to make it enforceable, where legally permissible.</p>
+              <p>The remaining provisions shall continue in full force and effect.</p>
+              <h4>26. Entire Agreement</h4>
+              <p>These Terms, together with the Platform&#x27;s Privacy Policy and any additional terms expressly incorporated into the Platform, constitute the agreement governing the User&#x27;s use of the Platform, unless a separate written agreement has been entered into between iHubSA and the User.</p>
+              <h4>27. Contact</h4>
+              <p>Questions, complaints, requests regarding Personal Information, or reports of suspected misuse should be directed to:</p>
+              <p><strong>iHubSA</strong><br><strong>Email:</strong> admin@ihub-sa.co.za<br><strong>Telephone: +27 66 2263462</strong></p>
+              <p>For POPIA-related matters, Users may contact iHubSA&#x27;s designated Information Officer using the contact details published on the Platform.</p>
+              <p><strong>IMPORTANT USER NOTICE</strong></p>
+              <p><strong>iHubSA is an RFQ facilitation platform. iHubSA does not guarantee the accuracy, legitimacy, financial standing, qualifications or performance of any RFQ Publisher or Respondent. Users are responsible for conducting their own due diligence before entering into any transaction or agreement.</strong></p>
+              <p><strong>iHubSA accepts no responsibility for false, misleading, fraudulent or inaccurate information submitted by Users, or for any contract, transaction, payment, goods, services, loss, damage or dispute arising between Users.</strong></p>
+              <p><strong>By using this Platform, you acknowledge and agree to these Terms and Conditions.</strong></p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn gold" onclick="closeModal('terms-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERIC "COMING SOON" INFO MODAL (About / Help / Terms placeholders) -->
+  <div id="info-page-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:440px;">
+      <div class="modal-head">
+        <h3 id="info-page-modal-title">Coming Soon</h3>
+        <button class="drawer-close" onclick="closeModal('info-page-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="info-page-modal-body" style="color:var(--ink);"></p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn gold" onclick="closeModal('info-page-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICANT REGISTRATION GATE MODAL -->
+  <div id="applicant-gate-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:680px;">
+      <div class="modal-head">
+        <h3 id="gate-modal-title">Register to View &amp; Apply</h3>
+        <button class="drawer-close" onclick="closeModal('applicant-gate-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="gate-modal-intro" style="color:var(--border); margin-bottom:20px;">To view this RFQ's details and apply, please confirm your email. It only takes a moment.</p>
+
+        <div id="gate-email-section">
+          <form id="gate-email-form">
+            <div style="margin-bottom:15px;">
+              <label>Email Address *</label>
+              <input type="email" id="gate-email" required style="width:100%; box-sizing:border-box;" placeholder="you@company.com">
+            </div>
+            <button type="submit" class="btn gold" id="gate-email-submit" style="width:100%; padding:12px;">Continue</button>
+          </form>
+          <p style="text-align:center; margin-top:15px; font-size:13px;">
+            <a href="#" onclick="showSupplierForgotPasswordView(); return false;" style="color:var(--primary); font-weight:600;">Forgot Password?</a>
+          </p>
+        </div>
+
+        <div id="gate-register-section" style="display:none;">
+          <p style="background:var(--bg-2); padding:12px; border-radius:4px; font-size:13px; color:var(--ink); margin-bottom:20px;">We don't have this email on file yet. Please complete registration on the RFQ Hub Supplier Database to continue.</p>
+                    <p style="background:#FFF8E1; border-left:3px solid var(--accent); padding:12px; border-radius:4px; font-size:13px; color:var(--ink); margin-bottom:20px;">📘 <strong>New here?</strong> Have your <strong>CIPC registration (or ID)</strong>, <strong>proof of address</strong> and <strong>SARS information</strong> ready as PDFs before you start — all three are required below. <a href="RFQ_Hub_Supplier_Guide.pdf" target="_blank" rel="noopener" style="color:var(--primary); font-weight:600;">Download the Supplier Guide (PDF)</a></p>
+          <form id="gate-register-form">
+
+            <h4 style="margin:0 0 12px 0; color:var(--primary);">Company Details</h4>
+            <div style="margin-bottom:15px;">
+              <label>Company Name *</label>
+              <input type="text" id="gate-company-name" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Number of Years in Business *</label>
+              <input type="number" id="gate-years-business" required min="0" step="1" style="width:100%; box-sizing:border-box;">
+            </div>
+
+            <h4 style="margin:20px 0 12px 0; color:var(--primary);">Main Contact Person</h4>
+            <div style="margin-bottom:15px;">
+              <label>Main Contact Person *</label>
+              <input type="text" id="gate-full-name" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Title *</label>
+              <select id="gate-title" required style="width:100%; box-sizing:border-box; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit;">
+                <option value="">Select...</option>
+                <option value="Ms">Ms</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Mr">Mr</option>
+                <option value="Dr">Dr</option>
+                <option value="Professor">Professor</option>
+              </select>
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Designation *</label>
+              <input type="text" id="gate-designation" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <div style="margin-bottom:15px; flex:1; min-width:200px;">
+                <label>Phone Number</label>
+                <input type="tel" id="gate-phone" style="width:100%; box-sizing:border-box;">
+              </div>
+              <div style="margin-bottom:15px; flex:1; min-width:200px;">
+                <label>Additional Contact Number</label>
+                <input type="tel" id="gate-additional-phone" style="width:100%; box-sizing:border-box;">
+              </div>
+            </div>
+
+            <h4 style="margin:20px 0 12px 0; color:var(--primary);">Location &amp; Reach</h4>
+            <div style="margin-bottom:15px;">
+              <label>Address *</label>
+              <textarea id="gate-address" required rows="2" style="width:100%; box-sizing:border-box; font-family:inherit; padding:10px; border:1px solid var(--border); border-radius:4px;"></textarea>
+              <p style="margin:6px 0 0 0; font-size:12px; color:var(--border);">Please note: preference will be given to businesses operating in the province/town listed on a given RFQ.</p>
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Notify Me About New Opportunities In *</label>
+              <select id="gate-province" required style="width:100%; box-sizing:border-box; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit;">
+                <option value="">Select a province...</option>
+                <option value="ALL">All Provinces</option>
+                <option value="Eastern Cape">Eastern Cape</option>
+                <option value="Free State">Free State</option>
+                <option value="Gauteng">Gauteng</option>
+                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                <option value="Limpopo">Limpopo</option>
+                <option value="Mpumalanga">Mpumalanga</option>
+                <option value="Northern Cape">Northern Cape</option>
+                <option value="North West">North West</option>
+                <option value="Western Cape">Western Cape</option>
+              </select>
+              <p style="margin:6px 0 0 0; font-size:12px; color:var(--border);">We'll email you when a new open RFQ is posted in this province. You can change this anytime from the link in those emails.</p>
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Website / Social Media</label>
+              <input type="text" id="gate-website" placeholder="Paste a link and/or share social media handles" style="width:100%; box-sizing:border-box;">
+            </div>
+
+            <h4 style="margin:20px 0 12px 0; color:var(--primary);">Services</h4>
+            <div style="margin-bottom:15px;">
+              <label>Please describe the services or products offered by your company. *</label>
+              <textarea id="gate-services-description" required rows="3" style="width:100%; box-sizing:border-box; font-family:inherit; padding:10px; border:1px solid var(--border); border-radius:4px;"></textarea>
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Please list the geographical areas that your company can service. *</label>
+              <textarea id="gate-service-areas" required rows="2" style="width:100%; box-sizing:border-box; font-family:inherit; padding:10px; border:1px solid var(--border); border-radius:4px;"></textarea>
+            </div>
+
+            <h4 style="margin:20px 0 12px 0; color:var(--primary);">Document Submission</h4>
+            <p style="margin:0 0 12px 0; font-size:12px; color:var(--border);">You can upload a PDF, Word/Excel file, or a photo of the document (JPG/PNG/HEIC) — a clear phone photo is fine. Certain uploads allow for only 1 file (can be multiple pages).</p>
+            <div style="margin-bottom:15px;">
+              <label>CIPC Registration or ID for Sole Prop/NPO Certificate/Other *</label>
+              <input type="file" id="gate-doc-cipc" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Proof of Address *</label>
+              <input type="file" id="gate-doc-proof-address" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>SARS Information (Tax Clearance Certificate/PIN and/or VAT/Tax Registration Proof) *</label>
+              <input type="file" id="gate-doc-sars" required style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Proof of Banking</label>
+              <input type="file" id="gate-doc-banking" style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>B-BBEE Affidavit or Certificate <span style="font-weight:normal; color:var(--border);">(if applicable)</span></label>
+              <input type="file" id="gate-doc-bbbee" style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Valid Health and Safety Certificate <span style="font-weight:normal; color:var(--border);">(if applicable)</span></label>
+              <input type="file" id="gate-doc-health-safety" style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Any Special Permits or Registrations <span style="font-weight:normal; color:var(--border);">(as applicable)</span></label>
+              <input type="file" id="gate-doc-permits" style="width:100%; box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label>Any Other Documents</label>
+              <input type="file" id="gate-doc-other" multiple style="width:100%; box-sizing:border-box;">
+            </div>
+
+            <h4 style="margin:20px 0 12px 0; color:var(--primary);">Declarations</h4>
+            <div style="background:var(--bg-2); padding:12px; border-radius:4px; font-size:12px; color:var(--ink); max-height:160px; overflow-y:auto; margin-bottom:15px;">
+              <p>By submitting this Supplier Registration Form, I declare and confirm that:</p>
+              <p>All information and supporting documentation provided in this application is, to the best of my knowledge, true, accurate, complete and current. I understand that the information provided may be relied upon when evaluating quotations, bids, proposals and other procurement opportunities.</p>
+              <p>I undertake to notify RFQ Hub of any material changes to the information provided in this application within ten (10) days of such change.</p>
+              <p>I confirm that I have read and understood the applicable Terms and Conditions, together with any disclaimers and notices relating to supplier registration, and agree to comply with these requirements.</p>
+              <p>I acknowledge that the information submitted will be treated confidentially and processed and stored in accordance with the Protection of Personal Information Act, 4 of 2013 (POPIA) and applicable data protection requirements.</p>
+              <p>By submitting this form and accepting this Declaration, I further acknowledge and agree that:</p>
+              <p>My business may be registered as a potential service provider on the RFQ Hub Supplier Database.</p>
+              <p>RFQ Hub may contact me from time to time regarding relevant procurement opportunities and may invite or encourage my business to submit quotations, bids or proposals for applicable goods or services.</p>
+              <p>Registration on the Supplier Database does not constitute appointment, accreditation, preferred supplier status, or a guarantee of any work, procurement opportunity or contract.</p>
+              <p>Participation in any procurement opportunity will remain subject to the applicable procurement process, requirements, evaluation criteria and approvals.</p>
+              <p style="margin-bottom:0;">RFQ Hub reserves the right to verify information and supporting documentation submitted as part of this registration.</p>
+            </div>
+            <div style="margin-bottom:15px; display:flex; align-items:flex-start; gap:8px;">
+              <input type="checkbox" id="gate-declaration-accept" required style="margin-top:3px;">
+              <label for="gate-declaration-accept" style="font-weight:normal;">I have read, understood and accept the above Declaration and the applicable Supplier Registration Terms and Conditions. *</label>
+            </div>
+
+            <button type="submit" class="btn gold" id="gate-register-submit" style="width:100%; padding:12px;">Register &amp; Continue</button>
+            <button type="button" class="btn secondary" style="width:100%; padding:12px; margin-top:10px;" onclick="gateBackToEmail()">← Use a different email</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPLIER FORGOT PASSWORD MODAL -->
+  <div id="supplier-forgot-password-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-head">
+        <h3>Reset Your Password</h3>
+        <button class="drawer-close" onclick="closeModal('supplier-forgot-password-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--border); font-size:14px; margin-bottom:15px;">Enter the email address on your account and we'll send you a 6-digit code to set a new password.</p>
+
+        <form id="supplier-forgot-password-form" style="display:flex; flex-direction:column; gap:15px;">
+          <div>
+            <label>Email</label>
+            <input type="email" id="supplier-forgot-password-email" required style="width:100%;">
+          </div>
+          <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Send Code</button>
+        </form>
+
+        <p id="supplier-forgot-password-sent-note" style="display:none; margin-top:5px; margin-bottom:15px; padding:12px; background:#E1F0FF; border-radius:4px; font-size:14px;">
+          If an account exists for that email, a 6-digit code is on its way. KEEP THIS SITE OPEN and check your inbox (and spam folder) — the code is valid for a limited time and can only be used once.
+        </p>
+
+        <form id="supplier-reset-code-form" style="display:none; flex-direction:column; gap:15px;">
+          <div>
+            <label>6-Digit Code</label>
+            <input type="text" id="supplier-reset-code-token" required inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" style="width:100%; letter-spacing:4px; font-size:18px; text-align:center;">
+          </div>
+          <div>
+            <label>New Password *</label>
+            <input type="password" id="supplier-reset-code-new-password" required minlength="6" style="width:100%;">
+          </div>
+          <div>
+            <label>Confirm New Password *</label>
+            <input type="password" id="supplier-reset-code-confirm-password" required minlength="6" style="width:100%;">
+          </div>
+          <button type="submit" class="btn gold" style="padding:12px; margin-top:5px;">Reset Password</button>
+        </form>
+
+        <p style="text-align:center; margin-top:15px; font-size:13px;">
+          <a href="#" onclick="showSupplierForgotPasswordView(); return false;" style="color:var(--primary); font-weight:600;">← Back to Password Reset</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASK FOR MORE INFORMATION MODAL -->
+  <div id="ask-question-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-head">
+        <h3>Ask for more information</h3>
+        <button class="drawer-close" onclick="closeModal('ask-question-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="ask-question-rfq-name" style="color:var(--primary); margin-bottom:20px; font-weight:bold;"></p>
+        <form id="ask-question-form">
+          <div style="margin-bottom:15px;">
+            <label>Email Address *</label>
+            <input type="email" id="ask-question-email" required style="width:100%; box-sizing:border-box;" placeholder="you@company.com">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label>Your Name</label>
+            <input type="text" id="ask-question-name" style="width:100%; box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label>Your Question *</label>
+            <textarea id="ask-question-text" required rows="4" style="width:100%; box-sizing:border-box; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit;" placeholder="e.g. Does the delivery timeframe include installation?"></textarea>
+          </div>
+          <p style="font-size:12px; color:var(--border); margin-bottom:20px;">Your question goes to the company that posted this RFQ. If they publish an answer, it's shown publicly on the RFQ page without your name or email — otherwise they'll reply to you directly by email.</p>
+          <button type="submit" class="btn gold" id="ask-question-submit" style="width:100%; padding:12px;">Send Question</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANSWER QUESTION MODAL (staff) -->
+  <div id="answer-question-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:520px;">
+      <div class="modal-head">
+        <h3>Reply to Question</h3>
+        <button class="drawer-close" onclick="closeModal('answer-question-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--bg-2); padding:12px; border-radius:4px; margin-bottom:20px;">
+          <p style="margin:0 0 4px 0; font-size:12px; text-transform:uppercase; color:var(--border); font-weight:bold;">Question</p>
+          <p id="answer-question-text" style="margin:0; white-space:pre-wrap;"></p>
+        </div>
+        <form id="answer-question-form">
+          <div style="margin-bottom:15px;">
+            <label>Your Answer *</label>
+            <textarea id="answer-question-response" required rows="4" style="width:100%; box-sizing:border-box; padding:10px; border:1px solid var(--border); border-radius:4px; font-family:inherit;"></textarea>
+          </div>
+          <div style="margin-bottom:15px;">
+            <label>Visibility *</label>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+              <label style="font-weight:normal; display:flex; align-items:flex-start; gap:8px;">
+                <input type="radio" name="answer-visibility" value="public" checked style="margin-top:3px;">
+                <span><strong>Post publicly on the RFQ page</strong><br><span style="font-size:12px; color:var(--border);">Visible to all contractors viewing this RFQ. Also emailed to the asker. Their identity is never shown to others.</span></span>
+              </label>
+              <label style="font-weight:normal; display:flex; align-items:flex-start; gap:8px;">
+                <input type="radio" name="answer-visibility" value="private" style="margin-top:3px;">
+                <span><strong>Send by email only</strong><br><span style="font-size:12px; color:var(--border);">Sent privately to the contractor who asked — not shown on the public RFQ page.</span></span>
+              </label>
+            </div>
+          </div>
+          <button type="submit" class="btn gold" id="answer-question-submit" style="width:100%; padding:12px;">Send Answer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="expand-search-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:480px;">
+      <div class="modal-head">
+        <h3>Expand Supplier Search</h3>
+        <button class="drawer-close" onclick="closeModal('expand-search-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0 0 15px 0; font-size:13px; color:var(--border);">Not getting enough applications? Notify registered suppliers in other provinces about this RFQ too. Provinces already notified aren't shown &mdash; nobody gets a duplicate notification.</p>
+        <form id="expand-search-form">
+          <div id="expand-search-provinces" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;"></div>
+          <button type="submit" class="btn gold" id="expand-search-submit" style="width:100%; padding:12px;">Notify Selected Provinces</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="edit-supplier-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:640px;">
+      <div class="modal-head">
+        <h3>Edit Supplier</h3>
+        <button class="drawer-close" onclick="closeModal('edit-supplier-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-supplier-form">
+          <div class="form-grid-2">
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Company Name *</label>
+              <input type="text" id="edit-supplier-company-name" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Contact Person *</label>
+              <input type="text" id="edit-supplier-full-name" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:15px;">
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Title</label>
+              <select id="edit-supplier-title" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                <option value="">—</option>
+                <option value="Ms">Ms</option>
+                <option value="Mrs">Mrs</option>
+                <option value="Mr">Mr</option>
+                <option value="Dr">Dr</option>
+                <option value="Professor">Professor</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Designation</label>
+              <input type="text" id="edit-supplier-designation" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:15px;">
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Email *</label>
+              <input type="email" id="edit-supplier-email" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Notify Province</label>
+              <select id="edit-supplier-province" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+                <option value="">Not set</option>
+                <option value="ALL">All Provinces</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:15px;">
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Phone</label>
+              <input type="tel" id="edit-supplier-phone" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Additional Phone</label>
+              <input type="tel" id="edit-supplier-additional-phone" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:15px;">
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Years in Business</label>
+              <input type="number" min="0" id="edit-supplier-years" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+            <div>
+              <label style="font-weight:bold; display:block; margin-bottom:8px;">Website / Social</label>
+              <input type="text" id="edit-supplier-website" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="margin-top:15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Address</label>
+            <textarea id="edit-supplier-address" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; min-height:60px; font-family:inherit;"></textarea>
+          </div>
+          <div style="margin-top:15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Services</label>
+            <textarea id="edit-supplier-services" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; min-height:60px; font-family:inherit;"></textarea>
+          </div>
+          <div style="margin-top:15px;">
+            <label style="font-weight:bold; display:block; margin-bottom:8px;">Service Areas</label>
+            <textarea id="edit-supplier-service-areas" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; box-sizing:border-box; min-height:60px; font-family:inherit;"></textarea>
+          </div>
+          <button type="submit" class="btn gold" id="edit-supplier-submit" style="width:100%; padding:12px; margin-top:20px;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-wrap" style="position:fixed; top:20px; right:20px; z-index:9999; max-width:400px;"></div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- SheetJS: reads .csv/.xlsx/.xls files client-side for the Supplier Database "Import Suppliers" feature -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="app.js"></script>
+  <script src="saas.js"></script>
+
+  <script>
+    // Initialize app on page load
+    window.addEventListener('load', () => {
+      initApp();
+    });
+
+    // Setup form on DOM ready
+    document.addEventListener('DOMContentLoaded', setupCreateRFQForm);
+  </script>
+</body>
+</html>
