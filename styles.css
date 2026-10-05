@@ -1594,3 +1594,49 @@ textarea:focus-visible {
   .plan-editor-grid { grid-template-columns: 1fr; }
   .pricing-price { font-size: 30px; }
 }
+
+/* ============================================================
+   Landing page: informative sections for suppliers
+   ============================================================ */
+.hero-facts { list-style: none; margin: 22px 0 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.hero-facts li { color: #DCE7F2; font-size: 14px; font-weight: 600; }
+.landing-block { max-width: 1200px; margin: 0 auto 36px auto; }
+.landing-block-ruled { margin-top: 50px; padding-top: 40px; border-top: 1px solid #E4E7EB; }
+.landing-lead { color: #4A5560; font-size: 15px; line-height: 1.6; max-width: 720px; margin: 10px 0 22px 0; }
+
+.province-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.province-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; background: #fff; border: 1px solid #E4E7EB; border-left: 4px solid #D5DAE1; border-radius: 8px; cursor: pointer; font: inherit; text-align: left; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.province-tile:hover { border-color: var(--primary-light); box-shadow: 0 4px 14px rgba(15,53,87,.08); transform: translateY(-1px); }
+.province-tile.has-open { border-left-color: var(--accent); }
+.province-name { font-weight: 700; color: var(--primary); font-size: 15px; }
+.province-count { font-size: 13px; color: #647A8F; }
+.province-tile.has-open .province-count { color: #8A4700; font-weight: 600; }
+
+.benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.benefit-card { background: #fff; border: 1px solid #E4E7EB; border-radius: 10px; padding: 22px; }
+.benefit-icon { width: 42px; height: 42px; border-radius: 10px; background: #FFF3E6; color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.benefit-card h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 16px; }
+.benefit-card p { margin: 0; color: #4A5560; font-size: 14px; line-height: 1.55; }
+
+.need-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.need-card { background: #fff; border: 1px solid #E4E7EB; border-radius: 10px; padding: 22px 24px; }
+.need-card h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 16px; }
+.need-card ul { margin: 0; padding-left: 20px; }
+.need-card li { color: #3A4652; font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
+
+.faq-list { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.faq-item { background: #fff; border: 1px solid #E4E7EB; border-radius: 8px; padding: 0 18px; }
+.faq-item summary { cursor: pointer; list-style: none; padding: 15px 28px 15px 0; font-weight: 700; color: var(--primary); position: relative; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; position: absolute; right: 0; top: 12px; font-size: 20px; color: var(--accent); }
+.faq-item[open] summary::after { content: "–"; }
+.faq-item p { margin: 0 0 16px 0; color: #4A5560; font-size: 14px; line-height: 1.6; }
+
+@media (max-width: 900px) { .benefit-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) {
+  .benefit-grid, .need-grid { grid-template-columns: 1fr; }
+  .province-grid { grid-template-columns: 1fr 1fr; }
+  .hero-facts li { font-size: 13px; }
+}
+
+.hero-facts + .hero-stats-row, #hero-stats-row { margin-top: 26px; }

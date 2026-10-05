@@ -8,7 +8,7 @@ const SUPABASE_URL = 'https://rszmmtqsxszchywpydrz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzem1tdHFzeHN6Y2h5d3B5ZHJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMDIxNzMsImV4cCI6MjEwNjU3ODE3M30.Jyg7AhSS7NhPt0xTQnuFOrJZ8e4LH2n1KvJHrOlp40o';
 // Must match the SITE_URL secret used by the Edge Functions EXACTLY (including
 // the trailing slash) and be allow-listed in Supabase Auth → URL Configuration.
-const SITE_URL = 'https://YOUR-DOMAIN.co.za/';
+const SITE_URL = 'https://ihubsa.github.io/RFQhub/';
 const SUPPORT_EMAIL = 'enquiries@ihub-sa.co.za';
 
 let client = null;
@@ -672,8 +672,8 @@ function showLandingView() {
   document.getElementById('landing-section').style.display = 'block';
   setHeaderActions('loggedOut');
 
-  document.getElementById('hero-title').textContent = 'Find Your Next Business Opportunity';
-  document.getElementById('hero-subtitle').textContent = 'Discover open Requests for Quotation from organisations looking for qualified suppliers and service providers.';
+  document.getElementById('hero-title').textContent = 'Looking for work? Let the RFQs find you.';
+  document.getElementById('hero-subtitle').textContent = 'Contractors across South Africa publish their Requests for Quotation here. Register free as a supplier, choose your provinces, and get an email the moment a matching opportunity opens. Then quote online, in one place.';
   const heroExtras = document.getElementById('hero-marketplace-extras');
   if (heroExtras) heroExtras.style.display = 'block';
 
